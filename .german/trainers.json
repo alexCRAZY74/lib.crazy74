@@ -1,0 +1,10 @@
+[
+	{
+		"file": "file://~project/lib.crazy74.md",
+		"required": false
+	},
+	{
+		"file": "file://~project/lib.crazy74.jquery.md",
+		"required": false
+	}
+]
