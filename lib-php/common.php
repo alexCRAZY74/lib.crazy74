@@ -1,20 +1,20 @@
 <?php
+declare(strict_types=1);
 if (!isset($_ROOTFOLDERS) || !is_array($_ROOTFOLDERS)) {
   $_ROOTFOLDERS = array();
 }
 $_ROOTFOLDERS[] = dirname(__FILE__)."/";
 
 if (!defined('SHOW_CLASS_INCLUDES')) define('SHOW_CLASS_INCLUDES',true);
-function is_assoc($var) {
-  return is_array($var) && array_diff_key($var,array_keys(array_keys($var)));
+if (!defined('APP_AUTOSTART')) define('APP_AUTOSTART',true);
+function is_assoc(mixed $var): bool {
+  return is_array($var) && !array_is_list($var);
 }
 class SharedCommon {
-  public static function auto_load($name) {
+  public static function auto_load(string $name): void {
     global $_ROOTFOLDERS;
     if (class_exists($name,false)) return;
-    if (function_exists('trait_exists')) {
-      if (trait_exists($name,false)) return;
-    }
+    if (trait_exists($name,false)) return;
     $includes = array();
     if (is_array($_ROOTFOLDERS) && !empty($_ROOTFOLDERS)) {
       foreach ($_ROOTFOLDERS as $DIR) {
@@ -27,20 +27,18 @@ class SharedCommon {
     $showautoload = isset($_REQUEST['showautoload']) && filter_var($_REQUEST['showautoload'], FILTER_VALIDATE_BOOLEAN);
     if ($showautoload) echo "<pre>".$name." : ".  print_r($includes,true)."</pre>";
     foreach($includes as $inc) {
-      if(file_exists ($inc)) {
+      if(is_readable($inc)) {
         //echo "<pre>".$name." : ".  print_r($inc,true)."</pre>";
         include_once $inc;
         if (class_exists($name,false)) return;
-        if (function_exists('trait_exists')) {
-          if (trait_exists($name,false)) return;
-        }
+        if (trait_exists($name,false)) return;
       }
     }
     $hideautoload = isset($GLOBALS['HIDE_CLASS_INCLUDES']) && $GLOBALS['HIDE_CLASS_INCLUDES'] === true;
     if (SHOW_CLASS_INCLUDES && !$showautoload && !$hideautoload) echo "<pre>".$name." : ".  print_r($includes,true)."</pre>";
   }
-  public static function includeList($name,$DIR) {
-    if (class_exists($name))      return;
+  public static function includeList(string $name, string $DIR): array {
+    if (class_exists($name)) return array();
     $includes = array();
     $pname = str_replace('\\', '/', $name);
     $includes[] = $DIR. $pname .".php";
@@ -84,8 +82,15 @@ class SharedCommon {
 }
 
 
-require_once dirname(__FILE__).'/Twig/Autoloader.php';
-\Twig_Autoloader::register();
+$twigLegacyAutoloader = dirname(__FILE__).'/Twig/Autoloader.php';
+if (is_readable($twigLegacyAutoloader)) {
+  require_once $twigLegacyAutoloader;
+  if (class_exists('Twig_Autoloader', false)) {
+    \Twig_Autoloader::register();
+  }
+}
 
 spl_autoload_register('SharedCommon::auto_load');
-App::startup();
+if (APP_AUTOSTART) {
+  App::startup();
+}

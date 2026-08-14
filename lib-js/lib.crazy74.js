@@ -72,15 +72,26 @@
 				case '.=':
 					newVal = String(currentVal || '') + String(value);
 					break;
+				case '|=':
+					newVal = currentVal | value;
+					break;
+				case '&=':
+					newVal = currentVal & value;
+					break;
+				case '^=':
+					newVal = currentVal ^ value;
+					break;
+				case '%=':
+					newVal = currentVal % value;
+					break;
 				case '=':
 				default:
 					newVal = value;
 					break;
 			}
 			target[key] = newVal;
-	}
+		}
 	};
-
 	ArrayVarManager.prototype.get_bool = function (target, key, defaultValue = false) {
 		const value = this.get(target, key, defaultValue);
 		if (typeof value === 'boolean') {
