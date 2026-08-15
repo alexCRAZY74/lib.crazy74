@@ -1,235 +1,251 @@
 <?php
+declare(strict_types=1);
+
 namespace core;
+
 abstract class utils {
-	public static function removeBOM($str="") {
-    if(substr($str, 0, 3) == pack('CCC', 0xef, 0xbb, 0xbf)) {
-        $str = substr($str, 3);
+
+    public static function removeBOM(string $str = ""): string {
+        if (str_starts_with($str, "\xEF\xBB\xBF")) {
+            return substr($str, 3);
+        }
+        return $str;
     }
-    return $str;
-  }
-	public static function get_encoding($str){
-		$cp_list = array('UTF-8', 'CP1251');
-		foreach ($cp_list as $k=>$codepage){
-				if (md5($str) === md5(iconv($codepage, $codepage, $str))){
-						return $codepage;
-				}
-		}
-		return 'UTF-8';
-	}
-  public static function sizebytes($svalue){
-    $end = 'b';
-    $value = $svalue;
-    if (abs($value) >= 1024) {
-      $value /= 1024;
-      $end = 'Kb';
-      if (abs($value) >= 1024) {
-        $value /= 1024;
-        $end = 'Mb';
+
+    public static function get_encoding(string $str): string {
+        $cp_list = ['UTF-8', 'CP1251'];
+        foreach ($cp_list as $codepage) {
+            $converted = iconv($codepage, $codepage, $str);
+            if ($converted !== false && md5($str) === md5($converted)) {
+                return $codepage;
+            }
+        }
+        return 'UTF-8';
+    }
+
+    public static function sizebytes(float|int $svalue): string {
+        $end = 'b';
+        $value = (float)$svalue;
+        
         if (abs($value) >= 1024) {
-          $value /= 1024;
-          $end = 'Gb';
+            $value /= 1024;
+            $end = 'Kb';
+            if (abs($value) >= 1024) {
+                $value /= 1024;
+                $end = 'Mb';
+                if (abs($value) >= 1024) {
+                    $value /= 1024;
+                    $end = 'Gb';
+                }
+            }
         }
-      }
+        
+        return \numbers::round($value, '0', ' ', 0, 2) . ' ' . $end;
     }
-    return numbers::round($value,'0',' ',0,2).' '.$end;
-  }
-	public static function to_utf8($str) {
-		return iconv(self::get_encoding($str), "UTF-8", $str);
-	}
-	public static function to_CP1251($str) {
-		return iconv(self::get_encoding($str), "CP1251", $str);
-	}
-	public static function rus_bool($data,$FILTER_NULL_ON_FAILURE = false) {
-		$data = sql_exec::clean_str($data);
-    $result = NULL;
-		switch ($data) {
-			case 'ДА' : case 'Да': case 'да': case 'YES' : case 'Yes': case 'yes': case 1 : $result = 'yes'; break;
-			case 'НЕТ' : case 'Нет': case 'нет': case 'NO' : case 'No': case 'no': case 0 : $result = 'no'; break;
-		}
-		if ($FILTER_NULL_ON_FAILURE) {
-			return filter_var($result, FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE);
-		} else {
-			return filter_var($result, FILTER_VALIDATE_BOOLEAN);
-		}
-  }
-	public static function getGUID() {
-		if (function_exists('com_create_guid')) {
-			return com_create_guid();
-		} else {
-			mt_srand(round((double) microtime() * 10000)); //optional for php 4.2.0 and up.
-			$charid = strtoupper(md5(uniqid(rand(), true)));
-			$hyphen = chr(45); // "-"
-			$uuid = chr(123)// "{"
-				. substr($charid, 0, 8) . $hyphen
-				. substr($charid, 8, 4) . $hyphen
-				. substr($charid, 12, 4) . $hyphen
-				. substr($charid, 16, 4) . $hyphen
-				. substr($charid, 20, 12)
-				. chr(125); // "}"
-			return $uuid;
-		}
-	}
 
-	public static function array_diff($array1, $array2, $strict = false) {
-		if (!is_array($array1)) {
-			throw new \InvalidArgumentException('$array1 must be an array!');
-		}
-
-		if (!is_array($array2)) {
-			return $array1;
-		}
-
-		$result = array();
-
-		foreach ($array1 as $key => $value) {
-			if (!array_key_exists($key, $array2)) {
-				$result[$key] = $value;
-				continue;
-			}
-
-			if (is_array($value) && count($value) > 0) {
-				$recursiveArrayDiff = static::array_diff($value, $array2[$key], $strict);
-
-				if (count($recursiveArrayDiff) > 0) {
-					$result[$key] = $recursiveArrayDiff;
-				}
-
-				continue;
-			}
-
-			$value1 = $value;
-			$value2 = $array2[$key];
-
-			if ($strict ? is_float($value1) && is_float($value2) : is_float($value1) || is_float($value2)) {
-				$value1 = (string) $value1;
-				$value2 = (string) $value2;
-			}
-
-			if ($strict ? $value1 !== $value2 : $value1 != $value2) {
-				$result[$key] = $value;
-			}
-		}
-
-		return $result;
-	}
-	public static function mask_phone($phone) {
- 		$debug = false && PHPDEBUG_MODE_OUTPUT;
-		if ($debug) console::groupFunc();
-		$phone = static::format_phone($phone);
-		$array = str_split($phone);
-		if ($debug) console::log('$array', $array);
-		$first = array_splice($array, 0, 2);
-		if ($debug) console::log('$first', $first);
-		$last = array_splice($array, -4);
-		if ($debug) console::log('$last', $last);
-		if ($debug) console::log('$array', $array);
-		$phone = implode($first);
-		$phone .= preg_replace('/[0-9]/', '*', implode($array));
-		$phone .= implode($last);
-		if ($debug) console::log('return', $phone);
-		if ($debug) console::groupEnd();
-    return $phone;
-	}
-	public static function format_phone($phone = '', $convert = false, $trim = false) {
-    // If we have not entered a phone number just return empty
-    if (empty($phone)) {
-        return '';
+    public static function to_utf8(string $str): string {
+        $converted = iconv(self::get_encoding($str), "UTF-8//IGNORE", $str);
+        return $converted !== false ? $converted : $str;
     }
- 		$debug = false && PHPDEBUG_MODE_OUTPUT;
-		if ($debug) console::groupFunc();
 
-    // Strip out any extra characters that we do not need only keep letters and numbers
-    $phone = preg_replace("/[^0-9A-Za-z]/", "", $phone);
- 
-    // Do we want to convert phone numbers with letters to their number equivalent?
-    // Samples are: 1-800-TERMINIX, 1-800-FLOWERS, 1-800-Petmeds
-    if ($convert == true) {
-        $replace = array('2'=>array('a','b','c'),
-                 '3'=>array('d','e','f'),
-                     '4'=>array('g','h','i'),
-                 '5'=>array('j','k','l'),
-                                 '6'=>array('m','n','o'),
-                 '7'=>array('p','q','r','s'),
-                 '8'=>array('t','u','v'), '9'=>array('w','x','y','z'));
- 
-        // Replace each letter with a number
-        // Notice this is case insensitive with the str_ireplace instead of str_replace 
-        foreach($replace as $digit=>$letters) {
-            $phone = str_ireplace($letters, $digit, $phone);
+    public static function to_CP1251(string $str): string {
+        $converted = iconv(self::get_encoding($str), "CP1251//IGNORE", $str);
+        return $converted !== false ? $converted : $str;
+    }
+
+    public static function rus_bool(mixed $data, bool $FILTER_NULL_ON_FAILURE = false): ?bool {
+        $cleanData = (string)$data;
+        if (class_exists('\\sql_exec') && method_exists('\\sql_exec', 'clean_str')) {
+            $cleanData = \sql_exec::clean_str($cleanData);
         }
+
+        $result = null;
+        switch (mb_strtoupper(trim($cleanData), 'UTF-8')) {
+            case 'ДА':
+            case 'YES':
+            case '1':
+            case 'TRUE':
+                $result = 'yes';
+                break;
+            case 'НЕТ':
+            case 'NO':
+            case '0':
+            case 'FALSE':
+                $result = 'no';
+                break;
+        }
+
+        if ($result === null) {
+            return $FILTER_NULL_ON_FAILURE ? null : false;
+        }
+
+        $flags = $FILTER_NULL_ON_FAILURE ? FILTER_NULL_ON_FAILURE : 0;
+        return filter_var($result, FILTER_VALIDATE_BOOLEAN, $flags);
     }
- 
-    // If we have a number longer than 11 digits cut the string down to only 11
-    // This is also only ran if we want to limit only to 11 characters
-    if ($trim == true && strlen($phone)>11) {
-        $phone = substr($phone,  0, 11);
+
+    public static function getGUID(): string {
+        if (function_exists('com_create_guid')) {
+            return com_create_guid();
+        }
+
+        $bytes = random_bytes(16);
+        $bytes[6] = chr(ord($bytes[6]) & 0x0f | 0x40);
+        $bytes[8] = chr(ord($bytes[8]) & 0x3f | 0x80);
+
+        $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($bytes), 4));
+        return '{' . strtoupper($uuid) . '}';
     }
- 
-		if ($debug) console::log('strlen($phone)', strlen($phone));
-    // Perform phone number formatting here
-    if (strlen($phone) == 7) {
-        $phone = preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1-$2", $phone);
-    } elseif (strlen($phone) == 10) {
-        $phone = preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "($1) $2-$3", $phone);
-    } elseif (strlen($phone) == 11) {
-        $phone = preg_replace("/([0-9a-zA-Z]{1})([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1($2) $3-$4", $phone);
-    } else {
-        $phone = preg_replace("/([0-9a-zA-Z]{1})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})([0-9a-zA-Z])/", "$1($2) $3-$4", $phone);
+
+    public static function array_diff(mixed $array1, mixed $array2, bool $strict = false): array {
+        if (!is_array($array1)) {
+            throw new \InvalidArgumentException('$array1 must be an array!');
+        }
+
+        if (!is_array($array2)) {
+            return $array1;
+        }
+
+        $result = [];
+
+        foreach ($array1 as $key => $value) {
+            if (!array_key_exists($key, $array2)) {
+                $result[$key] = $value;
+                continue;
+            }
+
+            if (is_array($value) && count($value) > 0) {
+                $recursiveArrayDiff = static::array_diff($value, $array2[$key], $strict);
+
+                if (count($recursiveArrayDiff) > 0) {
+                    $result[$key] = $recursiveArrayDiff;
+                }
+
+                continue;
+            }
+
+            $value1 = $value;
+            $value2 = $array2[$key];
+
+            if ($strict ? (is_float($value1) && is_float($value2)) : (is_float($value1) || is_float($value2))) {
+                $value1 = (string)$value1;
+                $value2 = (string)$value2;
+            }
+
+            if ($strict ? $value1 !== $value2 : $value1 != $value2) {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
     }
- 
-    // Return original phone if not 7, 10 or 11 digits long
-		if ($debug) console::log('return', $phone);
-		if ($debug) console::groupEnd();
-    return '+'.$phone;
-	}
-		static function json_indent($json) {
 
-		$result = '';
-		$pos = 0;
-		$strLen = strlen($json);
-		$indentStr = '  ';
-		$newLine = "\n";
-		$prevChar = '';
-		$outOfQuotes = true;
+    public static function mask_phone(string $phone): string {
+        $debug = false && defined('PHPDEBUG_MODE_OUTPUT') && PHPDEBUG_MODE_OUTPUT;
+        if ($debug && class_exists('\\console')) \console::groupFunc();
 
-		for ($i = 0; $i <= $strLen; $i++) {
+        $formatted = static::format_phone($phone);
+        $array = str_split($formatted);
 
-			// Grab the next character in the string.
-			$char = substr($json, $i, 1);
+        if ($debug && class_exists('\\console')) \console::log('$array', $array);
+        $first = array_splice($array, 0, 2);
+        if ($debug && class_exists('\\console')) \console::log('$first', $first);
+        $last = array_splice($array, -4);
+        if ($debug && class_exists('\\console')) \console::log('$last', $last);
+        if ($debug && class_exists('\\console')) \console::log('$array', $array);
 
-			// Are we inside a quoted string?
-			if ($char == '"' && $prevChar != '\\') {
-				$outOfQuotes = !$outOfQuotes;
+        $result = implode('', $first);
+        $result .= preg_replace('/[0-9]/', '*', implode('', $array));
+        $result .= implode('', $last);
 
-				// If this character is the end of an element,
-				// output a new line and indent the next line.
-			} else if (($char == '}' || $char == ']') && $outOfQuotes) {
-				$result .= $newLine;
-				$pos--;
-				for ($j = 0; $j < $pos; $j++) {
-					$result .= $indentStr;
-				}
-			}
+        if ($debug && class_exists('\\console')) \console::log('return', $result);
+        if ($debug && class_exists('\\console')) \console::groupEnd();
 
-			// Add the character to the result string.
-			$result .= $char;
+        return $result;
+    }
 
-			// If the last character was the beginning of an element,
-			// output a new line and indent the next line.
-			if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
-				$result .= $newLine;
-				if ($char == '{' || $char == '[') {
-					$pos++;
-				}
+    public static function format_phone(string $phone = '', bool $convert = false, bool $trim = false): string {
+        if ($phone === '') {
+            return '';
+        }
 
-				for ($j = 0; $j < $pos; $j++) {
-					$result .= $indentStr;
-				}
-			}
+        $debug = false && defined('PHPDEBUG_MODE_OUTPUT') && PHPDEBUG_MODE_OUTPUT;
+        if ($debug && class_exists('\\console')) \console::groupFunc();
 
-			$prevChar = $char;
-		}
+        $phone = (string)preg_replace("/[^0-9A-Za-z]/", "", $phone);
 
-		return $result;
-	}
+        if ($convert) {
+            $replace = [
+                '2' => ['a', 'b', 'c'],
+                '3' => ['d', 'e', 'f'],
+                '4' => ['g', 'h', 'i'],
+                '5' => ['j', 'k', 'l'],
+                '6' => ['m', 'n', 'o'],
+                '7' => ['p', 'q', 'r', 's'],
+                '8' => ['t', 'u', 'v'],
+                '9' => ['w', 'x', 'y', 'z']
+            ];
+
+            foreach ($replace as $digit => $letters) {
+                $phone = str_ireplace($letters, (string)$digit, $phone);
+            }
+        }
+
+        if ($trim && strlen($phone) > 11) {
+            $phone = substr($phone, 0, 11);
+        }
+
+        if ($debug && class_exists('\\console')) \console::log('strlen($phone)', strlen($phone));
+
+        $len = strlen($phone);
+        if ($len === 7) {
+            $phone = (string)preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1-$2", $phone);
+        } elseif ($len === 10) {
+            $phone = (string)preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "($1) $2-$3", $phone);
+        } elseif ($len === 11) {
+            $phone = (string)preg_replace("/([0-9a-zA-Z]{1})([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1($2) $3-$4", $phone);
+        } else {
+            $phone = (string)preg_replace("/([0-9a-zA-Z]{1})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})([0-9a-zA-Z])/", "$1($2) $3-$4", $phone);
+        }
+
+        if ($debug && class_exists('\\console')) \console::log('return', $phone);
+        if ($debug && class_exists('\\console')) \console::groupEnd();
+
+        return '+' . $phone;
+    }
+
+    public static function json_indent(string $json): string {
+        $result = '';
+        $pos = 0;
+        $strLen = strlen($json);
+        $indentStr = '  ';
+        $newLine = "\n";
+        $prevChar = '';
+        $outOfQuotes = true;
+
+        for ($i = 0; $i < $strLen; $i++) {
+            $char = $json[$i];
+
+            if ($char === '"' && $prevChar !== '\\') {
+                $outOfQuotes = !$outOfQuotes;
+            } elseif (($char === '}' || $char === ']') && $outOfQuotes) {
+                $result .= $newLine;
+                $pos--;
+                $result .= str_repeat($indentStr, max(0, $pos));
+            }
+
+            $result .= $char;
+
+            if (($char === ',' || $char === '{' || $char === '[') && $outOfQuotes) {
+                $result .= $newLine;
+                if ($char === '{' || $char === '[') {
+                    $pos++;
+                }
+                $result .= str_repeat($indentStr, max(0, $pos));
+            }
+
+            $prevChar = $char;
+        }
+
+        return $result;
+    }
 }
