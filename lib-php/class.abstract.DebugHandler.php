@@ -1,45 +1,81 @@
 <?php
+declare(strict_types=1);
+
 abstract class DebugHandler {
-	public static $forcedOutput = false;
-  public static function __callStatic($name, $arguments) {
-    /*echo "<pre>test: ".print_r(array(
-			'get_called_class'=>get_called_class(),
-			'self::class'=>self::class,
-			'__CLASS__'=> __CLASS__,
-		),true)."</pre>";*/
+	
+	/*Для совместимоти со старым debug (чтобы критической остановки не было) { */
+	public static bool $echo = true;
+	public static bool $noOut = false;
+	/*}*/
+
+	public static bool $forcedOutput = false;
+	public static array $skipfiles = array();
+	public static array $cssGroupLevels = array(
+		array(
+			'border' => '1px solid #74b0ea',
+			'background-color' => '#feffff',
+			'color' => '#0454a2',
+		),
+		array(
+			'border' => '1px solid #2f39ca',
+			'background-color' => '#f1faff',
+			'color' => '#020352',
+		),
+		array(
+			'border' => '1px solid #52ac63',
+			'background-color' => '#ecfde9',
+			'color' => '#026226',
+		),
+		array(
+			'border' => '1px solid #ad1ab9',
+			'background-color' => '#f7f1fd',
+			'color' => '#52024e',
+		),
+		array(
+			'border' => '1px solid #3c3fa8',
+			'background-color' => '#e3ecfb',
+			'color' => '#444b90',
+		),
+	);
+	public static int $GroupLevel = -1;
+
+	protected static array $stackTags = array();
+	protected static array $group_keys = array();
+	protected static mixed $times = null;
+	protected static array $mem_start = array();
+
+	public static function __callStatic(string $name, array $arguments): mixed {
 		if (!static::$forcedOutput) {
 			if (defined('PHPDEBUG_MODE_OUTPUT') && !PHPDEBUG_MODE_OUTPUT) {
-				return;
+				return null;
 			}
 		}
-    $class = get_called_class();
-    $static_postfix = '__static';
-    $method = '_'.$name.$static_postfix;
-    $mList = get_class_methods($class);
-    if (in_array($method, $mList)) {
-      return call_user_func_array(array($class, $method), $arguments);
-    }
-    echo "<pre>";
-    echo "Вызов статического метода '$name' (`$class`::`$method`) "
-         . implode(', ', $arguments). "\n";
+		$class = get_called_class();
+		$method = '_'.$name.'__static';
+		$mList = get_class_methods($class);
+		if (in_array($method, $mList)) {
+			return call_user_func_array(array($class, $method), $arguments);
+		}
+		echo "<pre>";
+		echo "Вызов статического метода '$name' (`$class`::`$method`) "
+			 . implode(', ', $arguments). "\n";
 		echo static::_lineFile__static() . "\n";
-    print_r($mList);echo "\r\n";echo "\r\n";
-    echo "</pre>";
+		print_r($mList);echo "\r\n";echo "\r\n";
+		echo "</pre>";
+		return null;
 	}
-	protected static function _trace__static(){
+
+	protected static function _trace__static(): void {
 		static::echo('tracecall',static::backtrace());
 	}
-	protected static function _logTrace__static(){
+
+	protected static function _logTrace__static(): void {
 		static::trace();
 	}
-	public static $skipfiles = array();
-	protected static function _backtrace__static(){
-		//static::echoGroup(__METHOD__);
+
+	protected static function _backtrace__static(): array {
 		$result = array();
 		$db = debug_backtrace();
-		//static::outecho('static::$skipfiles', static::$skipfiles);
-		//echo "<pre>static::\$skipfiles: ".print_r(static::$skipfiles, true)."</pre>";
-		//static::outecho('$db', $db);
 		if (is_array($db) && !empty($db)) {
 			foreach($db as $row) {
 				$skip = false;
@@ -57,22 +93,21 @@ abstract class DebugHandler {
 				}
 			}
 		}
-		//static::outecho('$result', $result);
-		//static::echoGroupEnd();
 		return $result;
 	}
-	protected static function _lineFile__static($short = false) {
+
+	protected static function _lineFile__static(bool $short = false): string {
 		$result = '';
 		$db = static::backtrace();
-		//static::outecho('$db', $db);
 		if (is_array($db) && !empty($db)) {
 			$result = ( $short ? basename($db[0]['file']) : $db[0]['file'] ).':'.$db[0]['line'];
 		}
 		return $result;
 	}
-	protected static function _html_css_from_array($css) {
+
+	protected static function _html_css_from_array(array $css): string {
 		$result = '';
-		if (is_array($css) && !empty($css)) {
+		if (!empty($css)) {
 			$lines = array();
 			foreach($css as $key => $value) {
 				$lines[] = "{$key}: {$value}";
@@ -81,32 +116,37 @@ abstract class DebugHandler {
 		}
 		return $result;
 	}
-	protected static $stackTags = array();
-	protected static function _html_tag_open($tag, $css = array()){
+
+	protected static function _html_tag_open(string $tag, array $css = array()): void {
 		static::$stackTags[] = $tag;
 		echo "<".$tag;
-		if (is_array($css) && !empty($css)) {
+		if (!empty($css)) {
 			echo ' style="'.static::_html_css_from_array($css).'"';
 		}
 		echo ">";
 	}
-	protected static function _html_tag_close(){
+
+	protected static function _html_tag_close(): void {
 		echo "</".array_pop(static::$stackTags).">";
 	}
-	protected static function _html_tag($tag, $content, $css = array()){
+
+	protected static function _html_tag(string $tag, mixed $content, array $css = array()): void {
 		static::_html_tag_open($tag,$css);
 		echo $content;
 		static::_html_tag_close();
 	}
-	protected static function _outecho__static(){
+
+	protected static function _outecho__static(): mixed {
 		return call_user_func_array(array(__CLASS__, '_echo__static'), func_get_args());
 	}
-	protected static function _memory__static(){
+
+	protected static function _memory__static(): int {
 		$result = memory_get_usage(false);
-		static::_echo__static('memory usage', \utils::sizebytes($result).' ('.\utils::sizebytes(memory_get_usage(true)).')');
+		static::_echo__static('memory usage', \number::sizebytes($result).' ('.\number::sizebytes(memory_get_usage(true)).')');
 		return $result;
 	}
-	protected static function _echo__static(){
+
+	protected static function _echo__static(): void {
 		$type = 'struc';
 		$title = '';
 		$variable = null;
@@ -127,7 +167,7 @@ abstract class DebugHandler {
 			$type = 'struc';
 		}
 		if ($type == 'table') {
-			debug::table($title,$variable);
+			static::table($title,$variable);
 		} else {
 			$cssBlock = array(
 				'color' => 'black',
@@ -165,16 +205,16 @@ abstract class DebugHandler {
 			echo "\r\n";
 		}
 	}
-	protected static function _groupFunc__static(){
+
+	protected static function _groupFunc__static(): mixed {
 		$title = null;
 		$db = debug_backtrace();
-		//static::outecho('$db', $db);
 		$trace = array();
 		$caller = array();
 		if (is_array($db) && !empty($db)) {
 			foreach($db as $row) {
 				$skip = false;
-				if (isset($row['class']) && in_array($row['class'], array(__CLASS__,'console'))) {
+				if (isset($row['class']) && is_a($row['class'], self::class, true)) {
 					$skip = true;
 				}
 				if (!$skip) {
@@ -184,12 +224,9 @@ abstract class DebugHandler {
 					$trace[] = $row;
 				}
 			}
-			//debug::outecho('$trace', $trace);
-			//echo '<pre>$trace = '.print_r($trace,true).'</pre>';
 			if (!empty($trace)) $caller = $trace[0];
 		}
 		if (!empty($caller)) {
-			//debug::outecho('$caller', $caller);
 			$args = array();
 			$title = '';
 			if (isset($caller['class'])) $title .= $caller['class'].' ';
@@ -216,7 +253,8 @@ abstract class DebugHandler {
 		array_unshift($args , $title);
 		return call_user_func_array(array(static::class, 'group'), $args);
 	}
-	protected static function _dump_var($variable, $type = 'var') {
+
+	protected static function _dump_var(mixed $variable, string $type = 'var'): string {
 		$el = error_reporting();
 		error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING ^ E_DEPRECATED);
 		ob_start();
@@ -232,12 +270,11 @@ abstract class DebugHandler {
 		$dump = str_replace("=>\n", "=>", $dump);
 		$dump = str_replace("=> \n", "=>", $dump);
 		$dump = str_replace(["=>  ","=>   "], "=> ", $dump);
-		//$dump = str_replace(["\n)","\n  )"], ")", $dump);
 		$dump = str_replace(["(\n)","(\n  )"], "()", $dump);
-		//$dump = str_replace(["    ","   ","  "], " ", $dump);
 		return htmlspecialchars($dump);
 	}
-	protected static function _table__static($label,$data = false){
+
+	protected static function _table__static(mixed $label, mixed $data = false): void {
 		$cssTable = array(
 			'color'=>'black',
 			'background-color'=>'#f7f4e2',
@@ -262,26 +299,22 @@ abstract class DebugHandler {
 			'border-bottom' => 'none',
 		));
 		if ($data === false) {
-      $data = $label;
-      $label = '';
-    }
-    if (!is_array($data) || empty($data)) {
-      static::echo($label, $data);
-      return;
-    }
+			$data = $label;
+			$label = '';
+		}
+		if (!is_array($data) || empty($data)) {
+			static::echo($label, $data);
+			return;
+		}
 		$keys = array_keys($data);
 		$row = $data[$keys[0]];
 		if (is_object($row)) $row = (array)$row;
-		/*if (!is_array($row)) {
-      static::echo($label, $data);
-      return;
-		}*/
-    $keys = is_array($row) ? array_keys($row) : array(null);
-    if (is_array($row)) foreach ($data as $k=>$row) {
+		$keys = is_array($row) ? array_keys($row) : array(null);
+		if (is_array($row)) foreach ($data as $k=>$row) {
 			if (is_object($row)) $row = (array)$row;
-      $keys = array_merge($keys,array_keys($row));
-    }
-    $keys = array_unique($keys);
+			$keys = array_merge($keys,array_keys($row));
+		}
+		$keys = array_unique($keys);
 		$keysInRow = count($keys) > 1 || (count($keys) == 1 && is_string($keys[0]));
 		static::_html_tag_open('table', $cssTable);
 		static::_html_tag_open('caption', $cssCellCaprion);
@@ -328,38 +361,8 @@ abstract class DebugHandler {
 		static::_html_tag_close(); //tbody
 		static::_html_tag_close(); //table
 	}
-	protected static $group_keys = array();
-	protected static $times = null;
-	protected static $mem_start = array();
-	public static $cssGroupLevels = array(
-		array(
-			'border' => '1px solid #74b0ea',
-			'background-color' => '#feffff',
-			'color' => '#0454a2',
-		),
-		array(
-			'border' => '1px solid #2f39ca',
-			'background-color' => '#f1faff',
-			'color' => '#020352',
-		),
-		array(
-			'border' => '1px solid #52ac63',
-			'background-color' => '#ecfde9',
-			'color' => '#026226',
-		),
-		array(
-			'border' => '1px solid #ad1ab9',
-			'background-color' => '#f7f1fd',
-			'color' => '#52024e',
-		),
-		array(
-			'border' => '1px solid #3c3fa8',
-			'background-color' => '#e3ecfb',
-			'color' => '#444b90',
-		),
-	);
-	public static $GroupLevel = -1;
-	protected static function _group__static($title = null, $border = null, $backgroundcolor = null) {
+
+	protected static function _group__static(?string $title = null, mixed $border = null, ?string $backgroundcolor = null): void {
 		$cssBlock = array(
 			'border' => '1px solid #d96500',
 			'background-color' => '#f7f4e2',
@@ -372,7 +375,6 @@ abstract class DebugHandler {
 		static::$GroupLevel++;
 		$GroupLevel = static::$GroupLevel;
 		if (!isset(static::$cssGroupLevels[$GroupLevel])) {
-			//static::_echo__static('$GroupLevel',$GroupLevel,count(static::$cssGroupLevels),($GroupLevel % count(static::$cssGroupLevels)));
 			$GroupLevel = $GroupLevel % count(static::$cssGroupLevels);
 		}
 		$cssIndex = isset(static::$cssGroupLevels[$GroupLevel])
@@ -396,13 +398,12 @@ abstract class DebugHandler {
 		));
 		$key = 'group_'.hrtime(true).'_'.count(static::$group_keys);
 		static::$group_keys[] = $key;
-    if (class_exists('worktimes')) {
-      if (!is_a(static::$times, 'worktimes')) {
-        static::$times = new worktimes();
-				//static::$times->debug = true;
-      }
-      static::$times->start($key,static::strcut($title));
-    }
+		if (class_exists('worktimes')) {
+			if (!is_a(static::$times, 'worktimes')) {
+				static::$times = new worktimes();
+			}
+			static::$times->start($key,static::strcut($title));
+		}
 		static::$mem_start[$key] = memory_get_usage(false);
 		if (is_string($title) && !empty($title)) {
 			static::_html_tag('div', $title, array(
@@ -410,9 +411,9 @@ abstract class DebugHandler {
 				'font-size' => '1.2rem',
 			));
 		}
-		//return call_user_func_array(array('debug', 'echoGroup'), func_get_args());
 	}
-	protected static function _groupEnd__static($label = false) {
+
+	protected static function _groupEnd__static(mixed $label = false): void {
 		$key = array_pop(static::$group_keys);
 		$postInfo = array();
 		if (is_string($label) && !empty($label)) {
@@ -432,42 +433,31 @@ abstract class DebugHandler {
 		}
 		static::$GroupLevel--;
 		static::_html_tag_close();
-		//return call_user_func_array(array('debug', 'echoGroupEnd'), func_get_args());
 	}
-	protected static function _echoGroup__static(){
+
+	protected static function _echoGroup__static(): mixed {
 		return call_user_func_array(array(__CLASS__, '_group__static'), func_get_args());
 	}
-	protected static function _echoGroupEnd__static(){
+
+	protected static function _echoGroupEnd__static(): mixed {
 		return call_user_func_array(array(__CLASS__, '_groupEnd__static'), func_get_args());
 	}
-	protected static function strcut($text, $maxlen = 50) {
+
+	protected static function strcut(mixed $text, int $maxlen = 50): mixed {
 		if (!(is_string($text) && !empty($text))) return $text;
 		$teaser = $text;
 		if (mb_strlen($text) > $maxlen) {
-			//this finds the position of the first period after 50 characters
-			$period = mb_strpos($text, '.', $maxlen);
-			//this finds the position of the first space after 50 characters
-			//we can use this for a clean break if a '.' isn't found.
-			$space = mb_strpos($text, ' ', $maxlen);
 			$period = false;
 			$space = false;
 			if ($period !== false) {
-				//this gets the characters 0 to the period and stores it in $teaser
 				$teaser = mb_substr($text, 0, $period);
 			} elseif ($space !== false) {
-				//this gets the characters 0 to the next space
 				$teaser = mb_substr($text, 0, $space);
 			} else {
-				//and if all else fails, just break it poorly
 				$teaser = mb_substr($text, 0, $maxlen);
 			}
 			$teaser = trim($teaser).'..';
 		}
 		return $teaser;
-	}
-
-	protected static function _test__static(){
-		static::outecho('lineFile', static::lineFile());
-		static::outecho('backtrace', static::backtrace());
 	}
 }

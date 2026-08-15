@@ -1,7 +1,8 @@
 <?php
+use \console as console;
 header('Cache-Control: max-age=0, no-store'); // Don't cache any html
 if (!defined('TWIG_TEMPLATES_DIR')) {
-  $tdir = $_ROOTFOLDERS[0]."twig_templates/";
+  $tdir = $_ROOTFOLDERS[0]."twig/";
   if (is_dir($tdir)) {
     define('TWIG_TEMPLATES_DIR',$tdir);
   } else {
@@ -19,8 +20,7 @@ abstract class TwigPage {
   function __construct(){
     $this->clientTimezone = \session::timezone();
   }
-  public function Init() {
-  }
+  public function Init() {}
   public static function templatenameVariants(){
     $class = get_called_class();
     //\debug::outecho('class',  $class);
@@ -38,16 +38,17 @@ abstract class TwigPage {
     return $pageName;
   }
   public static function Render(){
-    \debug::echoGroup("TwigPage::Render()");
+    console::groupFunc();
     $class = get_called_class();
     //\debug::outecho('class',  $class);
     $parts = explode('\\',$class);
     array_shift($parts);
     //\debug::outecho('$parts',  $parts);
     $pageName = static::templatenameVariants();
+    console::log('$pageName', json_encode($pageName));
     //\debug::outecho('$pageName',  $pageName);
     $folders = static::dirList(TWIG_TEMPLATES_DIR);
-    \debug::outecho('$folders',  $folders);
+    console::table('$folders',  $folders);
     $file = false;
     try {
       $loader = new \Twig_Loader_Filesystem($folders);
@@ -57,17 +58,21 @@ abstract class TwigPage {
         }
       }
     } catch (Exception $ex) {}
+		if ($file === false) {
+			\errors::Add('twig template no exists ('.implode(", ", $pageName).')');
+		}
     if (\App::$debugMode) {
       static::$Instance = new $class(...func_get_args());
       static::$Instance->arguments = func_get_args();
       static::$Instance->Init();
       \App::$debugTitle = $class;
-      \debug::outecho('template',  $file,$pageName);
+			console::log('template', ($file !== false ? $file : json_encode($pageName)) );
       if (\errors::Exists()) {
-        \debug::outecho('errors',  \errors::Get());
+        \console::log('errors',  \errors::Get());
+				\errors::Result(static::$Instance);
       }
+      console::groupEnd();
       \App::flush(static::$Instance);
-      \debug::echoGroupEnd();
       exit();
     }
     if (is_string($file)) {
@@ -97,12 +102,13 @@ abstract class TwigPage {
         die ('ERROR: ' . $ex->getMessage());
       }
     } else {
-      \debug::$echo = true;
-      \debug::$noOut = !\debug::$echo;
-      \debug::echoGroup("TwigPage::Render()");
-      \debug::outecho('need',  $pageName);
-      \debug::outecho('need',  $_GET);
-      \debug::echoGroupEnd();
+			$fo = console::$forcedOutput;
+			console::$forcedOutput = true;
+			console::groupFunc();
+			console::log('$pageName', $pageName);
+			console::log('$_GET', $_GET);
+			console::groupEnd();
+			console::$forcedOutput = $fo;
     }
   }
   static function templateByClass($class){

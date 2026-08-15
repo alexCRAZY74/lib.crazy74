@@ -11,13 +11,14 @@ if (!defined('__Numder_Fix_Precision__')) define('__Numder_Fix_Precision__', 0);
 if (!defined('__Numder_Max_Precision__')) define('__Numder_Max_Precision__', 1);
 
 // Базовые каталоги демонстрационного проекта
-define('__DIR_ROOT_', dirname(__FILE__) . "/demo/");
+define('__DIR_ROOT_', dirname(__FILE__) . "/");
+define('__DIR_DEMO_', dirname(__FILE__) . "/demo/");
 define('__DIR_DEBUG_', dirname(__FILE__) . "/debug/");
+define('TWIG_TEMPLATES_DIR', __DIR_DEMO_.'twig/');
 
 // Список корней для автоматической загрузки классов (SharedCommon::auto_load)
 // Каталоги classes/ и пространства имен сканируются внутри них автоматически
-$_ROOTFOLDERS = array();
-$_ROOTFOLDERS[] = __DIR_ROOT_;
+$_ROOTFOLDERS = array(__DIR_ROOT_, __DIR_DEMO_); //Нужно чтобы $_ROOTFOLDERS[0] было корнем отностительного пути http
 
 // Подключение общего ядра библиотеки: приоритет отдается серверной копии,
 // при отсутствии — используется локальная ветка для разработки

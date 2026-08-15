@@ -543,6 +543,30 @@
 		};
 	};
 
+	const StartEvenHandler = function (callback) {
+		this.callback = callback;
+		this.isLoaded = false;
+		this.isReady = false;
+		if (global.document.readyState !== 'loading') {
+      this.isReady = true;
+			this.check();
+    } else {
+      global.document.addEventListener('DOMContentLoaded', ()=>{
+				this.isReady = true;
+				this.check();
+			});
+    }
+		global.addEventListener('load', () => {
+			this.isLoaded = true;
+			this.check();
+		});
+	};
+	StartEvenHandler.prototype.check = function(){
+		if (this.isLoaded && this.isReady) {
+			if (typeof(this.callback) === 'function') this.callback();
+		}
+	};
+
 	const crazy74 = global.crazy74 || {};
 	crazy74.lang = new LangManager();
 	crazy74.number = new NumberManager();
@@ -551,6 +575,9 @@
 	crazy74.string = new StringManager();
 	crazy74.uuid = new UUID_Manager();
 	crazy74.bool = parseBool;
+	crazy74.onPageReady = function(...args) {
+		new StartEvenHandler(...args);
+	};
 	global.crazy74 = crazy74;
 
 })(typeof window !== 'undefined' ? window : this);

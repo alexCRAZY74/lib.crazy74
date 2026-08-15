@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  {% if this.title != null %}
+    <title>{{this.title}}</title>
+  {% endif %}
+	{{headLinkFile('/demo/js/jquery-3.4.0.js')}}
+	{{headLinkFile('/demo/js/jquery-migrate-3.0.0.js')}}
+  {{headLinkFile('/lib-js/lib.crazy74.js')}}
+  {{headLinkFile('/lib-js/lib.crazy74.jquery.js')}}
+  {{headLinkFile('/demo/js/server.js')}}
+  {{headLinkFile('/js/environment.js')}}
+  {{headLinkFile('/css/reset.css')}}
+  {{headLinkFile('/css/styles.css')}}
+{% block headFiles %}
+{% endblock %}  
+  <script type="text/javascript">
+		const clientTimezone = '{{this.clientTimezone}}';
+    {% block headJS %}
+    {% if this.PageID != null %}
+    const PageID = '{{this.PageID}}';
+    {% endif %}
+    {% if this.actionURL != null %}
+    const appURL = '{{this.actionURL}}';
+    {% endif %}
+    {% if this.pageClass != null %}
+    const pageClass = '{{this.pageClass}}';
+    {% endif %}
+    {% endblock %}
+  </script>
+    {% if this.pageJS != null %}
+      {{headLinkFile(this.pageJS)}}
+    {% endif %}
+</head>
+  {% block body %}
+  <body>
+  </body>
+  {% endblock %}  
+</html>
