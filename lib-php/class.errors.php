@@ -1,9 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 class errors extends staticStore {
-  static $list = array();
-  static function Add($line){
+
+  public static array $list = [];
+  public static string $resultKey = 'Errors';
+
+  public static function Add(mixed $line): mixed {
     static::$list[] = $line;
     return $line;
   }
-  static $resultKey = 'Errors';
 }

@@ -19,18 +19,30 @@
 {% block headFiles %}
 {% endblock %}  
   <script type="text/javascript">
-		const clientTimezone = '{{this.clientTimezone}}';
+    const appURL = '{{this.actionURL}}';
+		var clientTimezone = '{{this.clientTimezone}}';
+		if (!clientTimezone?.trim()) {
+			Server(false, 'App', 'set_timezone', {'_timezone':Intl.DateTimeFormat().resolvedOptions().timeZone}, (data)=>{
+				if (typeof(data.timezone) !== 'undefined') {
+					clientTimezone = data.timezone;
+					console.log('clientTimezone', clientTimezone);
+				}
+			});
+		}
+		const languageCode = '{{this.languageCode}}';
     {% block headJS %}
     {% if this.PageID != null %}
     const PageID = '{{this.PageID}}';
-    {% endif %}
-    {% if this.actionURL != null %}
-    const appURL = '{{this.actionURL}}';
     {% endif %}
     {% if this.pageClass != null %}
     const pageClass = '{{this.pageClass}}';
     {% endif %}
     {% endblock %}
+		Server(false, 'lang', 'Get', {lang:languageCode}, (data)=>{
+			if (typeof(data.langCode) !== 'undefined' && typeof(data.dictionary) !== 'undefined') {
+				crazy74.lang.init(data.langCode, data.dictionary);
+			}
+		});
   </script>
     {% if this.pageJS != null %}
       {{headLinkFile(this.pageJS)}}

@@ -1,92 +1,102 @@
 function doAjaxError(jqXHR, textStatus, errorThrown) {
-  $('body').reamoveClass('loading');
-  console.group('Ошибка: '+textStatus);
-  console.log({errorThrown:errorThrown,jqXHR:jqXHR});
+  $('body').removeClass('loading');
+
+  console.group(`Ошибка: ${textStatus}`);
+  console.log({ errorThrown, jqXHR });
   console.error(errorThrown);
   console.groupEnd();
-  var msg_text = 'Ошибка соединения!';
-  if (typeof(errorThrown) == 'string' && errorThrown != '') msg_text = 'Ошибка: '+errorThrown;
-  if (textStatus == 'parsererror') msg_text = 'Ошибка обработки данных!';
-  if (errorThrown == 'timeout') msg_text = 'Превышено время ожидания ответа';
-  if (typeof(jqXHR) != 'undefined' && typeof(jqXHR.responseText) == 'string') {
-    msg_text = msg_text + '<br/><br/><div class="highlight" style="font-size:0.85em;">' + jqXHR.responseText + '</div>';
+
+  let msgText = 'Ошибка соединения!';
+
+  if (typeof errorThrown === 'string' && errorThrown.trim() !== '') {
+    msgText = `Ошибка: ${errorThrown}`;
   }
-  console.log(msg_text);
-  if (typeof(jNomad) != 'undefined' && typeof(jNomad.modal.alert) == 'function') {
-    jNomad.modal.alert({class:'error',title:'Ошибка соединения!',text:msg_text});
+  if (textStatus === 'parsererror') {
+    msgText = 'Ошибка обработки данных!';
   }
-  return msg_text;
+  if (errorThrown === 'timeout') {
+    msgText = 'Превышено время ожидания ответа';
+  }
+
+  if (typeof jqXHR?.responseText === 'string') {
+    msgText += `<br/><br/><div class="highlight" style="font-size:0.85em;">${jqXHR.responseText}</div>`;
+  }
+
+  console.log(msgText);
+
+  if (typeof window.jNomad?.modal?.alert === 'function') {
+    window.jNomad.modal.alert({
+      class: 'error',
+      title: 'Ошибка соединения!',
+      text: msgText,
+    });
+  }
+
+  return msgText;
 }
-function Server(){
-  //console.warn({Server:this});
-  var indicateLoading = false;
-  var Callback = false;
-  var sendData = {};
-  var urlLine = {
-    url:appURL,
-    params: {
-    },
-    get: function(){
-      return this.url+'?'+$.param(this.params);
-    }
-  };
-  var params = urlLine.params;
-  if (typeof(this) != 'undefined' && typeof(this.defaultAjaxClass) == 'string') {
-    params.class = this.defaultAjaxClass;
-  }
-  var strparams = [];
-  for (var key in arguments) {
-    var arg = arguments[key];
-    switch (typeof(arg)) {
-      case 'boolean':
-        indicateLoading = arg;
-        break;
-      case 'string':
-        strparams.push(arg);
-        break;
-      case 'object':
-        //sendData = $.extend(true,{},sendData,arg);
-        sendData = arg;
-        break;
-      case 'function':
-        Callback = arg;
-        break;
+
+function Server(...args) {
+  let indicateLoading = false;
+  let callback = null;
+  let sendData = {};
+  const strParams = [];
+
+  const defaultClass = typeof this?.defaultAjaxClass === 'string' ? this.defaultAjaxClass : null;
+
+  for (const arg of args) {
+    if (typeof arg === 'boolean') {
+      indicateLoading = arg;
+    } else if (typeof arg === 'string') {
+      strParams.push(arg);
+    } else if (typeof arg === 'object' && arg !== null) {
+      sendData = arg;
+    } else if (typeof arg === 'function') {
+      callback = arg;
     }
   }
-  if (strparams.length == 1) {
-    params.method = strparams[0];
-  } else if (strparams.length > 1) {
-    params.class = strparams[0];
-    params.method = strparams[1];
+
+  const params = {};
+  if (defaultClass) {
+    params.class = defaultClass;
   }
-  params.random = Math.floor(Math.random()*100000);
-  var instance = this;
-  if (typeof(window.clientTimezone) != 'string' || window.clientTimezone == '') {
-    sendData['_timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  if (strParams.length === 1) {
+    params.method = strParams[0];
+  } else if (strParams.length > 1) {
+    params.class = strParams[0];
+    params.method = strParams[1];
   }
-  var ajaxParams = { 
-    url:urlLine.get(),
-    type:'POST',
+
+  params.random = Math.floor(Math.random() * 100000);
+
+  if (!params.class) {
+    return;
+  }
+
+  const targetUrl = `${appURL}?${$.param(params)}`;
+  const dataType = sendData.as_html ? 'text' : 'json';
+
+  if (indicateLoading) {
+    $('body').addClass('loading');
+  }
+
+  return $.ajax({
+    url: targetUrl,
+    type: 'POST',
     data: sendData,
-    dataType:"json",
-    error:doAjaxError,
-    success:function(data){
-      if (indicateLoading) $('body').removeClass('loading');
-      if (typeof(Callback)=='function') {
-        if (typeof(sendData.idrow) != 'undefined') {
-          Callback.call(instance,data,sendData.idrow);
+    dataType,
+    error: doAjaxError,
+    success: (data) => {
+      if (indicateLoading) {
+        $('body').removeClass('loading');
+      }
+      if (typeof callback === 'function') {
+        if (typeof sendData.idrow !== 'undefined') {
+          callback.call(this, data, sendData.idrow);
         } else {
-          Callback.call(instance,data);
+          callback.call(this, data);
         }
       }
     }
-  };
-  if (sendData.as_html) {
-    ajaxParams.dataType = 'text';
-  }
-  //console.info({indicateLoading:indicateLoading,Callback:Callback,sendData:sendData,urlLine:urlLine,params:params,ajaxParams:ajaxParams});
-  if (typeof(params.class) != 'undefined') {
-    if (indicateLoading) $('body').addClass('loading');
-    return $.ajax(ajaxParams);
-  }
+  });
 }

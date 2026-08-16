@@ -1,10 +1,15 @@
 <?php
+
+declare(strict_types=1);
+
 class changes extends staticStore {
-  static $list = array();
-  static function Add($gategory,$uid,$param = 0){
-    if (!isset(static::$list[$gategory])) static::$list[$gategory] = array();
-    if (!isset(static::$list[$gategory][$uid])) static::$list[$gategory][$uid] = array();
-    static::$list[$gategory][$uid][] = $param;
+
+  public static array $list = [];
+  public static string $resultKey = '_changes';
+
+  public static function Add(string|int $category, string|int $uid, mixed $param = 0): void {
+    static::$list[$category] ??= [];
+    static::$list[$category][$uid] ??= [];
+    static::$list[$category][$uid][] = $param;
   }
-  static $resultKey = '_changes';
 }

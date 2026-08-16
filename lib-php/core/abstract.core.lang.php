@@ -1,99 +1,185 @@
 <?php
+
+declare(strict_types=1);
+
 namespace core;
+
+use \console as console;
+
 abstract class lang {
-  static $code = false;
-  static $default = 'ru';
-  static function Error(){
+
+  public static string $code = '';
+  public static string $default = 'ru';
+	protected static string $sessionCacheKey = '__lang_cache';
+	protected static string $sessionCodeKey = '__lang_code';
+
+  public static function Error(mixed ...$args): mixed {
     if (class_exists('\\errors')) {
-      $args = func_get_args();
-      $line = call_user_func_array(array('\lang','Text'),$args);
+			array_unshift($args, 'errors');
+      $line = static::Text(...$args);
       return \errors::Add($line);
     }
+    return null;
   }
-  static function sysLabel(){
-    $args = func_get_args();
-    array_unshift($args, 'labels');
-    return call_user_func_array(array('\lang','Text'),$args);
+
+  public static function sysLabel(mixed ...$args): string|false {
+    //оставляем пока для совместимости, чтобы не поломалось
+    return static::Text(...$args);
   }
-  static function Text(){
-    if (!is_string(self::$code)) self::Init ();
-		//return '';
-    $args = func_get_args();
-    $aaa = $args;
-    $bb = $args;
-    $lastKey = array_pop($bb);
-    if (is_array($args) && !empty($args)) {
-      $section = array_shift($args);
-      $data = self::load($section);
-      //\debug::outecho($section.': $data',$data);
-      if (!empty($data)) {
-        $res = -1;
-        $tt = $data;
-        foreach($args as $key){
-          if (isset($tt[$key])) {
-            if ($key == $lastKey) {
-              $res = $tt[$key];
-              //debug::outecho('$res',$res);
-            }
-            //if ($tt[$key] === false) $res = $tt[$key];
-            //if (is_string($tt[$key])) $res = $tt[$key];
-            if (is_array($tt[$key])) $tt = $tt[$key];
-          } else {
-            $tt = -1;
-          }
-        }
-        if (is_string($res)) return $res;
-        if ($res === false) return $res;
+
+  public static function Text(mixed ...$args): string|false {
+    if (static::$code === '') {
+      static::Init();
+    }
+
+    if (empty($args)) {
+      return '';
+    }
+
+    $originalArgs = $args;
+    $section = array_shift($args);
+
+    if (!is_string($section)) {
+      return '[' . implode('::', array_map('strval', $originalArgs)) . ']';
+    }
+
+    $data = static::load($section);
+
+    if (!empty($data)) {
+      // Ищем нужный элемент по цепочке ключей с помощью array_var::get
+      $res = \array_var::get($data, $args, false);
+
+      if (is_string($res) || $res === false) {
+        return $res;
       }
     }
-    return '['.implode('::',$aaa).']';
+
+    return '[' . implode('::', array_map('strval', $originalArgs)) . ']';
   }
-  public static function getSection($section = false){
-    //debug::outecho('rq',$_REQUEST);
-    if (isset($_REQUEST['arguments']) && is_array($_REQUEST['arguments'])) {
-      if (isset($_REQUEST['arguments']['section'])) {
-        $section = $_REQUEST['arguments']['section'];
+
+  public static function getSection(string $section = 'labels'): array {
+    $reqSection = \array_var::get($_REQUEST, ['arguments', 'section']);
+    if (is_string($reqSection) && $reqSection !== '') {
+      $section = $reqSection;
+    }
+
+    if (static::$code === '') {
+      static::Init();
+    }
+
+    return static::load($section);
+  }
+
+  public static function load(string $name = 'labels', string $code = ''): array {
+    if ($code === '') {
+      $code = static::$code !== '' ? static::$code : static::$default;
+    }
+
+    if (!isset($_SESSION[static::$sessionCacheKey][$code])) {
+      static::buildCache($code);
+    }
+
+    return (array) \array_var::get($_SESSION, [static::$sessionCacheKey, $code, $name], []);
+  }
+
+  public static function current(string|bool $newcode = false): string {
+		if ($newcode !== false) {
+			static::$code = $newcode;
+      if (isset($_SESSION)) {
+        $_SESSION[static::$sessionCodeKey] = static::$code;
       }
+      static::Init();
+		}
+    if (static::$code === '') {
+      static::Init();
     }
-    if (!is_string(self::$code)) self::Init ();
-    return self::load($section);
+    return static::$code;
   }
-  static function load($name = 'labels',$code = false){
-    global $_ROOTFOLDERS;
-    if (!is_string($code)) {
-      $code = is_string(self::$code) ? self::$code : self::$default;
+	
+	public static function Get(): mixed {
+    if (static::$code === '') {
+      static::Init();
     }
-    $ret = array();
-    if (is_array($_ROOTFOLDERS) && !empty($_ROOTFOLDERS)) {
-      foreach($_ROOTFOLDERS as $dir){
-        $file = $dir.'/language/'.$code.'/'.$name.'.json';
-        //\debug::outecho($file,  is_readable($file)?'yes':'no');
-        if (is_readable($file)) {
-          $arr = json_decode(file_get_contents($file),true);
-          //\debug::outecho($file,  $arr);
-          if (is_array($arr) && !empty($arr)) {
-            $ret = array_merge_recursive($ret,$arr);
-          }
-        }
+		return array(
+			'langCode' => static::$code,
+			'dictionary' => \array_var::get($_SESSION, [static::$sessionCacheKey, static::$code])
+		);
+	}
+
+	public static function Init(): void {
+    $reqLang = \array_var::get(array_merge($_GET, $_POST), 'lang');
+
+    if (is_string($reqLang) && $reqLang !== '') {
+      static::$code = $reqLang;
+      if (isset($_SESSION)) {
+        $_SESSION[static::$sessionCodeKey] = static::$code;
       }
-    }
-    return $ret;
-  }
-  public static function current(){
-    if (!is_string(self::$code)) self::Init ();
-    return self::$code;
-  }
-  static function Init(){
-    $rr = array_merge($_GET,$_POST);
-    if (isset($rr['lang']) && is_string($rr['lang'])) {
-      self::$code = $rr['lang'];
-      if (isset($_SESSION)) $_SESSION['language'] = self::$code;
-    } elseif (isset($_SESSION) && isset($_SESSION['language'])) {
-      self::$code = $_SESSION['language'];
     } else {
-      self::$code = self::$default;
+      static::$code = (string) \array_var::get($_SESSION, static::$sessionCodeKey, static::$default);
     }
-    $info = self::load('info',self::$code);
-    if (empty($info)) self::$code = self::$default;
+
+    if (static::$code === '') {
+      static::$code = static::$default;
+    }
+
+    if (!isset($_SESSION[static::$sessionCacheKey][static::$code])) {
+      static::buildCache(static::$code);
+    }
+
+    // Проверка существования перевода (аналог старой проверки info)
+    $info = \array_var::get($_SESSION, [static::$sessionCacheKey, static::$code, 'info']);
+    if (empty($info)) {
+      static::$code = static::$default;
+      if (!isset($_SESSION[static::$sessionCacheKey][static::$code])) {
+        static::buildCache(static::$code);
+      }
+    }
+  }
+
+  private static function buildCache(string $code): void {
+    global $_ROOTFOLDERS;
+		$debug = true;
+		if ($debug) console::groupFunc();
+    $cache = [];
+
+    if (is_array($_ROOTFOLDERS) && !empty($_ROOTFOLDERS)) {
+      // Разворачиваем массив, как ты и просил
+      $folders = array_reverse($_ROOTFOLDERS);
+
+      foreach ($folders as $dir) {
+				if ($debug) console::group($dir);
+        $langDir = rtrim((string) $dir, '/\\') . '/language/';
+				if ($debug) console::log('$langDir', $langDir);
+
+        if (is_dir($langDir) && is_readable($langDir)) {
+          // Считываем все JSON-файлы в директории
+          $files = glob($langDir . '*_'.$code.'.json');
+					if ($debug) console::log('$files', $files);
+
+          if (is_array($files)) {
+            foreach ($files as $file) {
+              $content = file_get_contents($file);
+
+              if ($content !== false) {
+                $arr = json_decode($content, true);
+                if (is_array($arr) && !empty($arr)) {
+									$cache = array_replace_recursive($cache, $arr);
+                }
+              }
+            }
+          }
+        }
+				if ($debug) console::groupEnd();
+      }
+    }
+
+    $_SESSION[static::$sessionCacheKey][$code] = $cache;
+		if ($debug) console::groupEnd();
+  }
+
+  public static function ClearCache(): void {
+    if (isset($_SESSION[static::$sessionCacheKey])) {
+      unset($_SESSION[static::$sessionCacheKey]);
+    }
   }
 }

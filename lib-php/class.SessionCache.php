@@ -1,79 +1,106 @@
 <?php
+
+declare(strict_types=1);
+
 class SessionCache {
-  static $interval = '+2 minutes';
-  public static function checkTime(){
-    if (isset($_SESSION)) {
-      if (isset($_SESSION['cache'])) {
-        $limit = strtotime(self::$interval,( (int)$_SESSION['cache']['creation'] ) );
-        $current = strtotime('now');
-        if ($current > $limit) {
-          unset($_SESSION['cache']);
+
+  public static string $interval = '+2 minutes';
+
+  public static function checkTime(): void {
+    if (!isset($_SESSION)) {
+      return;
+    }
+
+    $creation = (int) \array_var::get($_SESSION, ['cache', 'creation'], 0);
+    if ($creation > 0) {
+      $limit = strtotime(self::$interval, $creation);
+      if (time() > $limit) {
+        unset($_SESSION['cache']);
+      }
+    }
+
+    if (!isset($_SESSION['cache'])) {
+      $_SESSION['cache'] = ['creation' => time()];
+    }
+  }
+
+  public static function clear(string|bool $key = false): void {
+    if (!isset($_SESSION)) {
+      return;
+    }
+
+    if ($key !== false && $key !== '') {
+      if (isset($_SESSION['cache'][$key])) {
+        unset($_SESSION['cache'][$key]);
+      }
+    } else {
+      $_SESSION['cache'] = ['creation' => time()];
+    }
+  }
+
+  public static function set(string $key, mixed $value): void {
+    if (!isset($_SESSION)) {
+      return;
+    }
+
+    if (!isset($_SESSION['cache'])) {
+      $_SESSION['cache'] = ['creation' => time()];
+    }
+
+    $_SESSION['cache'][$key] = $value;
+  }
+
+  public static function check(mixed ...$args): array {
+    $key = '';
+    if (!empty($args)) {
+      $key = implode('::', array_map('strval', $args));
+    }
+
+    if ($key === '') {
+      $key = self::getKey();
+    }
+
+    $exist = false;
+    $cachedata = null;
+
+    if (isset($_SESSION['cache']) && array_key_exists($key, $_SESSION['cache'])) {
+      $cachedata = $_SESSION['cache'][$key];
+      $exist = true;
+    }
+
+    return [$exist, $cachedata, $key];
+  }
+
+  private static function getKey(): string {
+    $db = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 3);
+    $key = '';
+
+    $frame2 = \array_var::get_array($db, 2);
+    if (!empty($frame2)) {
+      $class = (string) \array_var::get($frame2, 'class', '');
+      $key .= $class !== '' ? $class . '_' : '_fn_';
+
+      $func = (string) \array_var::get($frame2, 'function', '');
+      if ($func !== '') {
+        $key .= '_' . $func . '_';
+      }
+    }
+
+    foreach ([1, 2] as $index) {
+      $frameArgs = \array_var::get_array($db, [$index, 'args']);
+      if (!empty($frameArgs)) {
+        $scalarArgs = array_filter($frameArgs, 'is_scalar');
+        $key .= implode('_', $scalarArgs);
+
+        foreach ($frameArgs as $aa) {
+          if (is_array($aa) && !empty($aa)) {
+            $scalarSub = array_filter($aa, 'is_scalar');
+            $key .= implode('_', $scalarSub);
+          }
         }
       }
-      //unset($_SESSION['cache']);
-      if (!isset($_SESSION['cache'])) {
-        $_SESSION['cache'] = array('creation'=>strtotime('now'));
-      }
     }
-  }
-  public static function clear($key = false){
-    if (isset($_SESSION)) {
-      if ($key !== false) {
-        if (isset($_SESSION['cache']) && isset($_SESSION['cache'][$key])) unset($_SESSION['cache'][$key]);
-      } else {
-        $_SESSION['cache'] = array('creation'=>strtotime('now'));
-      }
-    }
-  }
-  public static function set($key,$value){
-    if (isset($_SESSION)) {
-      if (!isset($_SESSION['cache'])) {
-        $_SESSION['cache'] = array('creation'=>strtotime('now'));
-      }
-      $_SESSION['cache'][$key] = $value;
-    }
-  }
-  public static function check(){
-    $exist = false;
-    $cachedata = false;
-    $args = func_get_args();
-    if (!empty($args)) $key = implode ('::', $args);
-    if (!is_string($key) || empty($key)) $key = self::getKey();
-    if (isset($_SESSION)) {
-      if (isset($_SESSION['cache'][$key])) {
-        $cachedata = $_SESSION['cache'][$key];
-        $exist = true;
-      }
-    }
-    //debug::outecho('$key',$key);
-    return array($exist,$cachedata,$key);
-  }
-  private static function getKey(){
-    $key = '';
-    $db = debug_backtrace();
-    //debug::outecho('$db',$db);
-    if (isset($db[2])) {
-      if (isset($db[2]['class'])) {
-        $key .= $db[2]['class'].'_';
-      } else {
-        $key .= '_fn_';
-      }
-      if (isset($db[2]['function'])) {
-        $key .= '_'.$db[2]['function'].'_';
-      }
-    }
-    if (isset($db[1]) && isset($db[1]['args']) && is_array($db[1]['args']) && !empty($db[1]['args'])) {
-      $key .= implode($db[1]['args'],'_');
-      foreach ($db[1]['args'] as $aa) {
-        if (is_array($aa) && !empty($aa)) $key .= implode($aa,'_');
-      }
-    } 
-    if (isset($db[2]) && isset($db[2]['args']) && is_array($db[2]['args']) && !empty($db[2]['args'])) {
-      $key .= implode($db[2]['args'],'_');
-      foreach ($db[2]['args'] as $aa) {
-        if (is_array($aa) && !empty($aa)) $key .= implode($aa,'_');
-      }
-    }
+
     return $key;
   }
 }

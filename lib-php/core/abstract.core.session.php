@@ -1,91 +1,56 @@
 <?php
+
+declare(strict_types=1);
+
 namespace core;
+
 abstract class session {
-  static $cookieKey = 'cRazersUniverseCK';
-  public static function timezone($value = '') {
-    $result = '';
-    if (empty($value)) {
-      $result = $_SESSION['__timezone'];
-    } else {
-      $_SESSION['__timezone'] = $value;
-      $result = $value;
+
+  public static string $cookieKey = 'cRazersUniverseCK';
+
+  public static function timezone(string $value = ''): string {
+    if ($value === '') {
+      return (string) \array_var::get($_SESSION, '__timezone', '');
     }
-    return $result;
+
+    $_SESSION['__timezone'] = $value;
+    return $value;
   }
-  public static function authorized(){
-    return (isset($_SESSION) && isset($_SESSION['account']) && !empty($_SESSION['account']));
-  }
-  public static function Clear(){
-    if (isset($_SESSION) && isset($_SESSION['account'])) {
-      unset($_SESSION['account']);
-    }
-    if (isset($_SESSION) && isset($_SESSION['__timezone'])) {
+
+  public static function Clear(): void {
+    if (isset($_SESSION['__timezone'])) {
       unset($_SESSION['__timezone']);
     }
-    if (is_string(static::$cookieKey) && isset($_COOKIE)) {
-      setcookie(static::$cookieKey,"",time()-10000,"/");
+    if (isset($_COOKIE[static::$cookieKey])) {
+      setcookie(static::$cookieKey, '', time() - 10000, '/');
     }
   }
-  public static function Create($row){
-    $_SESSION['account'] = array(
-      'id'=>(int)$row['id'],
-      'isadmin'=>(bool)$row['isadmin'],
-    );
-    if (isset($row['timezone']) && !empty($row['timezone'])) {
-      static::timezone($row['timezone']);
+
+  public static function Create(array $row): void {
+    $_SESSION['account'] = [
+        'id' => (int) \array_var::get($row, 'id', 0),
+        'isadmin' => \array_var::get_bool($row, 'isadmin', false),
+    ];
+
+    $tz = (string) \array_var::get($row, 'timezone', '');
+    if ($tz !== '') {
+      static::timezone($tz);
     }
+
     $tm = \dates::fmtForMysql();
-    $upd = array(
-      'lastvisit'=>$tm
-    );
-    if (is_string(static::$cookieKey) && isset($_COOKIE)) {
-      $newKey = md5($tm.json_encode($row).static::$cookieKey);
+    $upd = [
+        'lastvisit' => $tm,
+    ];
+
+    if (isset($_COOKIE)) {
+      $newKey = md5($tm . json_encode($row, JSON_UNESCAPED_UNICODE) . static::$cookieKey);
       $upd['cookie'] = $newKey;
-      setcookie(static::$cookieKey,$newKey,time()+(3600*168),"/");
-    }
-    //\debug::outecho('$upd',$upd);
-    if (\db_population::update(dbtableAccounts, (int)$row['id'], $upd)) {
-      $_SESSION['account']['lastvisit'] = $tm;
-      $user = new \Player($row['id']);
-      //\debug::outecho('$user',$user);
-      if (is_object($user) && $user->id != 0){
-        $_SESSION['account']['character.id'] = $user->id;
-        $_SESSION['account']['nick'] = $user->{'name.nick'};
-        $_SESSION['account']['name'] = $user->{'name.viewed'};
-        $_SESSION['account']['gender'] = $user->{'social.gender'};
-        if ($user->{'social.pic.exists'}) {
-          $_SESSION['account']['avatar'] = $user->{'social.pic.url'};
-        }
-      }
-    } else {
-      unset($_SESSION['account']);
+      setcookie(static::$cookieKey, $newKey, time() + (3600 * 168), '/');
     }
   }
-  public static function checkCookie(){
-    if (static::authorized() || !isset($_COOKIE) || empty($_COOKIE) || !isset($_COOKIE[static::$cookieKey])) return;
-    //\debug::outecho('$_COOKIE',static::$cookieKey,$_COOKIE);
-    //\debug::outecho('$_COOKIE',$_COOKIE);
-    $row = \db_population::row("select * from `".dbtableAccounts."` where `cookie` = '{$_COOKIE[static::$cookieKey]}'");
-    //\debug::outecho('$row',$row);
-    if ($row !== false) static::Create($row);
-  }
-  public static function accountID(){
-    if (isset($_SESSION)) {
-      if (isset($_SESSION['account']) && isset($_SESSION['account']['id'])) {
-        return $_SESSION['account']['id'];
-      }
-    }
-    return false;
-  }
-  public static function playerID(){
-    if (isset($_SESSION)) {
-      if (isset($_SESSION['account']) && isset($_SESSION['account']['character.id'])) {
-        return $_SESSION['account']['character.id'];
-      }
-    }
-    return false;
-  }
-  public static function is_localhost(){
-    return ( gettype(strpos($_SERVER['SERVER_NAME'],'localhost')) == 'integer' );
+
+  public static function is_localhost(): bool {
+    $serverName = (string) \array_var::get($_SERVER, 'SERVER_NAME', '');
+    return str_contains($serverName, 'localhost');
   }
 }

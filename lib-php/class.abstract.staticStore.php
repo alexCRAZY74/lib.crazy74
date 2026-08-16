@@ -1,22 +1,40 @@
 <?php
+
+declare(strict_types=1);
+
 abstract class staticStore {
-  static $list = array();
-  static function Exists() {
+
+  public static array $list = [];
+  public static string $resultKey = '___S';
+
+  public static function Exists(): bool {
     return !empty(static::$list);
   }
-  static function Get(){
+
+  public static function Get(): array {
     return static::$list;
   }
-  static function Clear(){
-    static::$list = array();
+
+  public static function Clear(): void {
+    static::$list = [];
   }
-  static $resultKey = '___S';
-  static function Result(&$data){
-    if (!empty(static::$list)) {
-      $key = static::$resultKey;
-      if (is_object($data)) $data->{$key} = static::$list;
-      if (is_assoc($data)) $data[$key] = static::$list;
-      if (is_array($data) && empty($data)) $data[$key] = static::$list;
+
+  public static function Result(mixed &$data): void {
+    if (empty(static::$list)) {
+      return;
+    }
+
+    $key = static::$resultKey;
+
+    if (is_object($data)) {
+      $data->{$key} = static::$list;
+      return;
+    }
+
+    if (is_array($data)) {
+      if (empty($data) || (function_exists('is_assoc') && is_assoc($data))) {
+        $data[$key] = static::$list;
+      }
     }
   }
 }

@@ -7,6 +7,7 @@ abstract class basePage extends \TwigPage {
 		$debug = true;
 		console::groupFunc();
     parent::__construct();
+		$this->languageCode = \lang::current();
 		$this->actionURL = \App::urlServer().'/index.php';
     $parts = explode('\\',  get_class($this));
     array_shift($parts);
