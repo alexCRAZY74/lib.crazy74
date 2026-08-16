@@ -16,8 +16,6 @@ abstract class App {
 		return [
 			'coreVersion' => static::$coreVersion,
 			'lang' => \lang::current(),
-			'authorized' => \session::authorized(),
-			'labels' => \lang::load(),
 		];
 	}
 
