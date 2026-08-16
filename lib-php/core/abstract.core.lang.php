@@ -138,7 +138,7 @@ abstract class lang {
 
   private static function buildCache(string $code): void {
     global $_ROOTFOLDERS;
-		$debug = true;
+		$debug = false;
 		if ($debug) console::groupFunc();
     $cache = [];
 
