@@ -8,7 +8,7 @@ class App extends \core\App {
 		$query = [];
 
 		if (!empty($arguments)) {
-			$keys = ['_page', 'URL'];
+			$keys = ['_page', 'lang'];
 			foreach ($arguments as $idx => $value) {
 				$key = $keys[$idx] ?? 'param' . $idx;
 				$query[$key] = $value;
