@@ -15,7 +15,7 @@
   {{headLinkFile('/demo/js/server.js')}}
   {{headLinkFile('/js/environment.js')}}
   {{headLinkFile('/css/reset.css')}}
-  {{headLinkFile('/css/styles.css')}}
+  {{headLinkFile('/demo/css/styles.css')}}
 {% block headFiles %}
 {% endblock %}  
   <script type="text/javascript">
@@ -50,6 +50,7 @@
 </head>
   {% block body %}
   <body>
+		{{ inset('navigate') }}
   </body>
   {% endblock %}  
 </html>

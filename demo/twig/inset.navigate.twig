@@ -1,0 +1,11 @@
+{% if this.items is not null %}
+	<ul class="navigate-menu">
+	{% for key in this.items %}
+		{% if key == parent.PageID %}
+			<li class="active"><span>{{ text('pages', key, 'menu-item') }}</span></li>
+		{% else %}
+			<li><a href="{{ pageURL(key) }}">{{ text('pages', key, 'menu-item') }}</a></li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+{% endif %}

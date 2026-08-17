@@ -1,0 +1,33 @@
+{
+	"pages": {
+		"index": {
+			"menu-item": "Система",
+			"title": "Система, Запросы и Отладка",
+			"description": "Демонстрация работы ядра, сессий, локализации и прямого дампа отладки ?debug=yes"
+		},
+		"quantities": {
+			"menu-item": "Числа и Даты",
+			"title": "Величины, Числа и Даты",
+			"description": "Форматирование байт, чисел, падежей и динамическое время SmartTime"
+		},
+		"rest_api": {
+			"menu-item": "REST-API",
+			"title": "REST-API и AJAX-обмен",
+			"description": "Тестирование эндпоинтов, обработка ответов и работа server.js"
+		},
+		"ai_integration": {
+			"menu-item": "ИИ-Интерфейс",
+			"title": "Интеграция ИИ и Провайдеры",
+			"description": "Тестирование Gemini / OpenAI API, парсинг ответов и JSON-схем"
+		},
+		"ui_templates": {
+			"menu-item": "Twig & UI",
+			"title": "Шаблонизация TwigPage и UI",
+			"description": "Рендеринг компонентов, контроллер версий headLinkFile и блоки"
+		}
+	},
+	"common": {
+		"debug_mode": "Режим отладки",
+		"lang_switch": "Язык"
+	}
+}

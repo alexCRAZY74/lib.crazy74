@@ -141,24 +141,14 @@ abstract class TwigPage {
   }
 
   public static function twig__inset(...$args): string {
-    if (empty($args))
-      return '';
+    if (empty($args)) return '';
 
-    $oldflag = \debug::$echo;
+    $oldflag = \debug::$forcedOutput;
     $debug = in_array('debug', $args, true);
     $findclass = in_array('findclass', $args, true);
 
-    if ($debug)
-      \debug::$echo = true;
-    \debug::$noOut = !\debug::$echo;
-
-    if ($debug) {
-      $argpl = [];
-      foreach ($args as $v) {
-        $argpl[] = "'{$v}'";
-      }
-      \debug::echoGroup("TwigPage::twig__inset( " . implode(', ', $argpl) . " )");
-    }
+    if ($debug) console::$forcedOutput = true;
+    if ($debug) console::groupFunc();
 
     $name = array_shift($args);
     $class = "\\inset\\" . $name;
@@ -171,7 +161,7 @@ abstract class TwigPage {
     $GLOBALS['HIDE_CLASS_INCLUDES'] = !($findclass && $debug);
 
     if ($debug)
-      \debug::table('inset', [[
+      console::table('inset', [[
       '$class' => $class,
       '$file' => $file,
       '$findclass' => $findclass,
@@ -203,10 +193,8 @@ abstract class TwigPage {
       }
     }
 
-    if ($debug)
-      \debug::outecho('functions', implode(', ', array_keys($functions)));
-    if ($debug)
-      \debug::outecho('$renderdata', $renderdata);
+    if ($debug) console::log('functions', implode(', ', array_keys($functions)));
+    if ($debug) console::log('$renderdata', $renderdata);
 
     try {
       $loader = new \Twig_Loader_Filesystem(static::dirList(TWIG_TEMPLATES_DIR));
@@ -214,10 +202,8 @@ abstract class TwigPage {
         $parentClass = get_parent_class($renderdata['this']);
         if ($parentClass !== false) {
           $fileparent = static::templateByClass('\\' . $parentClass);
-          if ($debug)
-            \debug::outecho('$fileparent', $fileparent, $loader->exists($fileparent) ? 'exists' : 'lost');
-          if ($loader->exists($fileparent))
-            $file = $fileparent;
+          if ($debug) console::log('$fileparent', $fileparent, $loader->exists($fileparent) ? 'exists' : 'lost');
+          if ($loader->exists($fileparent)) $file = $fileparent;
         }
       }
 
@@ -238,10 +224,8 @@ abstract class TwigPage {
       die('ERROR: ' . $ex->getMessage());
     }
 
-    if ($debug)
-      \debug::echoGroupEnd();
-    \debug::$echo = $oldflag;
-    \debug::$noOut = !\debug::$echo;
+    if ($debug) console::groupEnd();
+    console::$forcedOutput = $oldflag;
     $GLOBALS['HIDE_CLASS_INCLUDES'] = $hideautoload;
 
     return $result;

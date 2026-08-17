@@ -19,6 +19,7 @@ abstract class basePage extends \TwigPage {
 		array_shift($parts);
 
 		$this->PageID = implode('_', $parts);
+    $this->title = \lang::Text('pages', $this->PageID, 'title');
 		$scriptName = '/demo/js/page.' . implode('.', $parts) . '.js';
 
 		// \debug::outecho('test', \lang::getSection('pages'));
