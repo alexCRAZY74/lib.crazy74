@@ -36,25 +36,13 @@ abstract class lang {
       return '';
     }
 
-    $originalArgs = $args;
-    $section = array_shift($args);
+		$result = \array_var::get($_SESSION, [static::$sessionCacheKey, static::$code, ...$args], false);
 
-    if (!is_string($section)) {
-      return '[' . implode('::', array_map('strval', $originalArgs)) . ']';
-    }
-
-    $data = static::load($section);
-
-    if (!empty($data)) {
-      // Ищем нужный элемент по цепочке ключей с помощью array_var::get
-      $res = \array_var::get($data, $args, false);
-
-      if (is_string($res) || $res === false) {
-        return $res;
-      }
-    }
-
-    return '[' . implode('::', array_map('strval', $originalArgs)) . ']';
+		if($result === false) {
+			return '[' . implode('::', array_map('strval', $args)) . ']';
+		}
+		
+		return $result;
   }
 
   public static function getSection(string $section = 'labels'): array {
@@ -107,7 +95,10 @@ abstract class lang {
 	}
 
 	public static function Init(): void {
+		$debug = false;
+		if ($debug) console::groupFunc();
     $reqLang = \array_var::get(array_merge($_GET, $_POST), 'lang');
+		if ($debug) console::log('$reqLang', $reqLang);
 
     if (is_string($reqLang) && $reqLang !== '') {
       static::$code = $reqLang;
@@ -127,13 +118,15 @@ abstract class lang {
     }
 
     // Проверка существования перевода (аналог старой проверки info)
-    $info = \array_var::get($_SESSION, [static::$sessionCacheKey, static::$code, 'info']);
+    /*$info = \array_var::get($_SESSION, [static::$sessionCacheKey, static::$code, 'info']);
     if (empty($info)) {
       static::$code = static::$default;
       if (!isset($_SESSION[static::$sessionCacheKey][static::$code])) {
         static::buildCache(static::$code);
       }
-    }
+    }*/
+		if ($debug) console::log('static::$code', static::$code);
+		if ($debug) console::groupEnd();
   }
 
   private static function buildCache(string $code): void {
