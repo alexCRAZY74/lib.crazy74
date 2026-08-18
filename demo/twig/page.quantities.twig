@@ -1,0 +1,93 @@
+{% extends "template.plain.twig" %}
+
+{% block content %}
+<div class="content quantities-demo">
+
+	<section class="demo-card">
+		<h2>1. Числа и Величины (`crazy74.number`)</h2>
+		<div class="demo-grid">
+			<div class="form-group">
+				<label for="input-number">Числовое значение:</label>
+				<input type="text" id="input-number" value="1542000" class="form-control" />
+			</div>
+		</div>
+
+		<div class="results-box">
+			<div><strong>crazy74.number.smartFormat():</strong> <span id="res-smartFormat" class="val-badge"></span></div>
+			<div><strong>crazy74.number.sizebytes():</strong> <span id="res-sizebytes" class="val-badge"></span></div>
+			<div><strong>crazy74.number.withEnding():</strong> <span id="res-withEnding" class="val-badge"></span></div>
+		</div>
+	</section>
+
+	<section class="demo-card">
+		<h2>2. Даты и Умное время (`crazy74.date` & `SmartTime`)</h2>
+		<div class="demo-grid">
+			<div class="form-group">
+				<label for="input-date">Дата и время (ISO / SQL / Timestamp):</label>
+				<input type="text" id="input-date" value="2026-08-18 04:00:00" class="form-control" />
+			</div>
+			<div class="form-group">
+				<label>Быстрый выбор:</label>
+				<div class="button-group">
+					<button type="button" class="btn-preset" data-time="-5min">-5 минут</button>
+					<button type="button" class="btn-preset" data-time="-2hour">-2 часа</button>
+					<button type="button" class="btn-preset" data-time="-1day">-1 день</button>
+					<button type="button" class="btn-preset" data-time="now">Сейчас</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="results-box">
+			<div><strong>crazy74.date.formatLocale():</strong> <span id="res-dateFormatLocale" class="val-badge"></span></div>
+			<div><strong>crazy74.date.fmtSmart():</strong> <span id="res-dateFmtSmart" class="val-badge"></span></div>
+			<div><strong>crazy74.date.fmtAgo():</strong> <span id="res-dateFmtAgo" class="val-badge"></span></div>
+			<div><strong>$.fn.SmartTime() (плагин):</strong> <span id="res-smarttime" class="val-smarttime"></span></div>
+		</div>
+	</section>
+
+	<section class="demo-card">
+		<h2>3. Флаги и Идентификаторы (`crazy74.bool`, `crazy74.uuid`)</h2>
+		<div class="demo-grid">
+			<div class="form-group">
+				<label for="input-bool">Строковое значение (`yes`, `1`, `true`, `нет`, `0`):</label>
+				<input type="text" id="input-bool" value="yes" class="form-control" />
+			</div>
+			<div class="form-group">
+				<label>&nbsp;</label>
+				<button type="button" id="btn-regen-uuid" class="btn-preset">Перегенерировать UUID</button>
+			</div>
+		</div>
+
+		<div class="results-box">
+			<div><strong>crazy74.bool():</strong> <span id="res-boolVal" class="val-badge"></span></div>
+			<div><strong>crazy74.uuid.get('v4'):</strong> <span id="res-uuid-v4" class="val-badge"></span></div>
+			<div><strong>crazy74.uuid.get('base36', 12):</strong> <span id="res-uuid-base36" class="val-badge"></span></div>
+			<div><strong>$.getGUID():</strong> <span id="res-guid-jquery" class="val-badge"></span></div>
+		</div>
+	</section>
+
+	<section class="demo-card">
+		<h2>4. jQuery-плагины (`FormData`, `$.isEmpty`, `maxZIndex`)</h2>
+		<form id="demo-form" class="demo-grid">
+			<div class="form-group">
+				<label>Имя пользователя:</label>
+				<input type="text" name="user[name]" value="Alex" class="form-control" />
+			</div>
+			<div class="form-group">
+				<label>Роль:</label>
+				<select name="user[role]" class="form-control">
+					<option value="admin">Admin</option>
+					<option value="developer" selected>Developer</option>
+				</select>
+			</div>
+		</form>
+
+		<div class="results-box">
+			<div><strong>$(form).FormData():</strong> <span id="res-formData" class="val-badge"></span></div>
+			<div><strong>$.isEmpty(FormData):</strong> <span id="res-isEmpty" class="val-badge"></span></div>
+			<div><strong>$.maxZIndex():</strong> <span id="res-maxZIndex" class="val-badge"></span></div>
+		</div>
+	</section>
+
+</div>
+{% endblock %}

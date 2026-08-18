@@ -154,6 +154,21 @@ App::ajax();
 
 ---
 
+### `\core\dates` и псевдоним `dates`
+
+Абстрактный класс `\core\dates` (и глобальный класс-наследник `dates extends \core\dates` в `default.class.dates.php`, по аналогии с `lang` и `session`) отвечает за форматирование дат и времени, включая локализацию и русское склонение месяцев.
+
+#### Ключевые методы
+
+* `public static function fmtForMysql(int|string|bool|null $dt = false): string` — приводит произвольное значение даты к формату MySQL (`Y-m-d H:i:s`); при `false`, `null` или пустой строке возвращает текущее время.
+* `public static function FormatLocale(int|string|null $dt, ?string $format = null, bool $withTime = true): string` — форматирует дату по локализованному шаблону. Если формат не передан явно, берется из языковой секции `date` (`\lang::getSection('date')`) по ключу `locale_format_with_time` или `locale_format` (в зависимости от `$withTime`), по умолчанию `j.m.Y H:i`. Токены `F`/`M` в шаблоне заменяются на локализованное название месяца из `dateSection['monthsformat']`.
+* `public static function fmtRussian(int|string|null $dt, string $format = 'j F Y г.'): string` — форматирование с захардкоженными русскими названиями месяцев в родительном падеже (пары «полное/сокращённое» для каждого месяца), подставляемыми в те же токены `F`/`M` шаблона.
+* `public static function fmtSmart(int|string|null $dt, bool $withTime = true): string` — «умное» относительное форматирование: значение `'never'` транслируется в локализованный текст (`\lang::Text('date', 'neverdate')`); для дат, совпадающих с сегодня/вчера/позавчера/завтра/послезавтра, подставляются соответствующие локализованные метки; для остальных дат — откат на `FormatLocale(..., withTime: false)`. При `$withTime = true` к результату добавляется время в формате `H:i`.
+
+Дата на входе принимается как timestamp (`int`) либо как строка, разбираемая `strtotime()`; при нераспознанном значении методы возвращают пустую строку (кроме `fmtForMysql`, который в этом случае отдает текущее время).
+
+---
+
 ### `SessionCache`
 
 Класс `SessionCache` предоставляет механизм временного кэширования результатов тяжелых операций (запросов к БД, расчетов) в пределах пользовательской сессии.
@@ -255,6 +270,15 @@ App::ajax();
 * `mask_phone(string $phone): string` — маскирование средних цифр номера телефона звездочками (например, `+7******1234`).
 * `json_indent(string $json): string` — красиво форматированный индент для JSON-строк с переносами и отступами.
 
+### `\core\number` и псевдоним `number`
+
+Абстрактный класс `\core\number` (и глобальный псевдоним `number extends \core\number`) содержит статические методы для форматирования чисел, адаптивного округления, склонения числительных и работы с единицами измерения:
+
+* `smartFormat(int|float|string|null $value, string|bool $unitKey = false, bool $hideOne = false, int $fix_precision = __Numder_Fix_Precision__, int $max_precision = __Numder_Max_Precision__): string` — умное форматирование чисел с адаптивным округлением, сокращением больших порядков (kilo, mega, giga через языковые константы `\lang` при превышении порога `__Numder_Rounding_Threshold__`) и автоматическим склонением единиц измерения из языковой секции `numbers.units`.
+* `ending(int|float $num, array $endings = ['штука', 'штуки', 'штук'], string $null = ''): string` — грамматическое склонение существительных по числительным согласно правилам русского языка (1 штука, 2 штуки, 5 штук).
+* `round(int|float|string|null $lp_value, string $replacer = '0', string $thousands_sep = '', int $fix_precision = 0, int $max_precision = 4): string` — гибкое округление чисел с отсечением незначащих нулей (в диапазоне от `$fix_precision` до `$max_precision`), настраиваемым разделителем тысяч и значением-заглушкой (`$replacer`) для пустых данных.
+* `sizebytes(int|float|string|null $svalue): string` — конвертация и форматирование объема данных в байтах в человекочитаемый вид (`b`, `Kb`, `Mb`, `Gb`).
+
 ---
 
 ## Инструменты профилирования (`worktimes`)
@@ -310,3 +334,60 @@ App::ajax();
 * `public static function get(string|array $key, mixed $default = null): mixed` — универсальный метод для получения значения из `$_REQUEST` по скалярному ключу или цепочке вложенных ключей, делегируя `array_var::get()`.
 * `public static function filter(string|array $key, int $filter = FILTER_DEFAULT, int $options = 0): mixed` — фильтрация значения из `$_REQUEST` с помощью `filter_var()`, используя `array_var::get()` для извлечения исходного значения.
 * `public static function get_bool(string|array $key, int $options = 0): bool` — получение булева значения из `$_REQUEST` с корректной валидацией через `static::filter()` и `FILTER_VALIDATE_BOOLEAN`, возвращая `false` при неудачной фильтрации.
+
+---
+
+## Интеграция с AI-провайдерами (`namespace AI`)
+
+Компоненты пространства имен `AI` реализуют единый интерфейс для работы с внешними LLM-провайдерами (Google Gemini, OpenAI-совместимые API) поверх `\REST\HTTP`, разделяя формирование запроса, отправку и разбор ответа на три независимых слоя: `Request` (что спрашиваем), `Response` (в каком формате ждем ответ и как его накапливаем) и наследники `API` (как именно обращаемся к конкретному провайдеру).
+
+### `AI\API` — базовый шаблон запроса
+
+Не абстрактный класс, но рассчитан на наследование по схеме Template Method: `MakeREST()`, `MakeDATA()`, `ParseAnswer()` в базовой реализации — заглушки/дефолты, переопределяемые в провайдер-специфичных наследниках.
+
+* `public function Request(Request $request, Response $response): void` — основной цикл: получает REST-клиента через `MakeREST()` (если результат не объект или не содержит метод `request`, выполнение тихо прерывается), собирает тело запроса через `MakeDATA()`, выполняет `$rest->request($data)`, передает сырой ответ в `ParseAnswer()`, а результат — в `$response->Process()`.
+* `protected function ParseAnswer(mixed $answer): mixed` — в базовом классе возвращает ответ без изменений; провайдеры переопределяют для нормализации в общий формат (`text_list`/`error`/`raw`).
+* `protected function MakeDATA(Request $request, Response $response): array` — дефолтная сборка тела в формате Gemini (`contents[0].parts[]`): сначала системные инструкции из `$response->getFormat()`, затем содержимое `$request->get()`, каждый элемент — отдельный `['text' => ...]`.
+* `protected function MakeREST(): ?object` — в базовом классе возвращает `null` (запрос не выполнится); переопределяется в `GoogleType`/`OpenAIType`.
+
+### `AI\Request`
+
+Накопитель содержимого запроса: разделяет статичные «системные» инструкции (`defines`) и динамические пользовательские данные (`data`).
+
+* Конструктор `__construct(array $def = [])` — принимает начальный набор инструкций/трейнер-файлов.
+* `public function Add(mixed $val): void` — добавляет элемент в пользовательские данные.
+* `public function AddDefine(mixed $val): void` / `public function AddTrainer(mixed $val): void` — алиасы, добавляют элемент в `defines`.
+* `public function AddTrainerFile(string $file, string $title = '', string $location = ''): bool` — читает файл-трейнер с диска (`is_readable`/`file_get_contents`), по расширению определяет `Content-Type` (`json` → `application/json`, `md`/`markdown` → `text/markdown`, иначе `text/plain`), формирует псевдо-HTTP-заголовок (`Content-Type`, опционально `Content-Title`, `Content-Location`) и добавляет его вместе с содержимым файла как единый элемент `defines` через `AddTrainer()`. Возвращает `false`, если файл не читается или пуст.
+* `public function get(): array` — возвращает `defines` и `data`, объединенные через `array_merge()` (порядок: сначала инструкции, затем пользовательский ввод).
+
+### `AI\Response` и `AI\ResponseJSON`
+
+Базовый класс-получатель ответа, нормализующий результат работы провайдера в единый плоский вид.
+
+* `public const ?string FORMAT = null` — системная инструкция по умолчанию (отсутствует); переопределяется в наследниках.
+* `public bool $success`, `public mixed $answer` (сырой ответ провайдера), `public mixed $error` — публичное состояние после обработки.
+* `public function getFormat(): ?array` — оборачивает `static::FORMAT` в массив из одного элемента либо возвращает `null`, если формат не задан.
+* `public function ParseAnswerText(string $text): void` — накопление одного распознанного текстового фрагмента во внутренний `$data`.
+* `public function Process(mixed $parsedResponse): void` — принимает результат провайдер-специфичного `ParseAnswer()` в ожидаемом формате (`text_list`, `error`, `raw`): для каждого элемента `text_list` вызывает `ParseAnswerText()` и выставляет `success = true`; сохраняет `error`/`raw`, если ключи присутствуют. Содержит отключаемую флагом `$debug` трассировку через `console::groupFunc()`/`console::log()`.
+* `public function get(): string` / `public function toArray(): array` — отдача накопленного текста строкой (через `\r\n`) или массивом.
+
+`ResponseJSON extends Response` переопределяет `FORMAT` жесткой системной инструкцией на русском («Отвечай ТОЛЬКО чистым JSON без пояснений и Markdown-разметки»), принуждая модель отвечать чистым JSON без пояснений.
+
+### `AI\GoogleType` — адаптер Google Gemini
+
+Абстрактный наследник `API`, инкапсулирующий формат запроса/ответа Gemini Generative Language API.
+
+* Константы, переопределяемые в конкретных провайдерах: `MODELS` (карта доступных моделей), `API_KEYS` (пул ключей для ротации), `SESSION_KEY` — ключ хранения индекса текущего API-ключа в сессии.
+* `SetModel(string|int|false $model): void` — принимает либо имя модели строкой, либо числовой индекс (резолвится через `array_keys(static::MODELS)`); в конструкторе, если модель не задана явно, выбирается модель с индексом 0.
+* `protected function MakeREST(): ?\REST\HTTP` — при пустом `API_KEYS` возвращает `null`; иначе выбирает ключ по круговой ротации (счетчик в `$_SESSION[SESSION_KEY]`, инкремент с обнулением по достижении `count($keys)`), формирует `\REST\HTTP` с URL вида `.../models/{model}:generateContent?key={apikey}`, `COMMAND_IN_PARAMS`, отключенной проверкой SSL-сертификата и JSON-телом.
+* `protected function MakeDATA(...): array` — дополняет базовую Gemini-структуру полем `generationConfig.responseMimeType = 'application/json'`, требуя JSON-ответ на уровне API независимо от текста системной инструкции.
+* `protected function ParseAnswer(mixed $answer): array` — разбирает `candidates[].content.parts[].text` в плоский `text_list`, извлекает `error`, сохраняет исходный ответ в `raw`.
+
+### `AI\OpenAIType` — адаптер OpenAI-совместимых API
+
+Аналогичный по назначению адаптер для чат-эндпоинтов формата OpenAI (`/chat/completions` и совместимые).
+
+* Те же константы, что и у `GoogleType` (`MODELS`, `API_KEYS`, `SESSION_KEY`), плюс `API_URL` — фиксированный адрес эндпоинта (в отличие от Gemini, URL не собирается динамически по имени модели).
+* Выбор модели (`SetModel`) и ротация ключей в `MakeREST()` реализованы независимо от `GoogleType`, дублируя ту же логику; отличие — ключ передается не в query-параметре, а через `$http->token` (авторизация заголовком), а `webhookUrl` берется напрямую из `static::API_URL`.
+* `protected function MakeDATA(&$request, &$response): array` — сигнатура без типов параметров (в отличие от `API::MakeDATA(Request $request, Response $response)`), с ручной проверкой типа через `is_a($request, 'AI\Request')`/`is_a($response, 'AI\Response')` вместо декларации типов. Собирает тело в формате OpenAI: `model`, `messages[]`, где системный формат передается с `role: 'system'`, а элементы запроса — с `role: 'user'` (приведение к строке, пропуск `null`/пустых значений).
+* `protected function ParseAnswer($answer): array` — разбирает `choices[].message.content` в `text_list`, аналогично извлекает `error` и сохраняет `raw`.

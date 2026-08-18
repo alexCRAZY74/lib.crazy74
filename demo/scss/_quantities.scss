@@ -1,0 +1,96 @@
+/* --- Demo Cards Layout --- */
+
+.quantities-demo {
+  display: flex;
+  flex-direction: column;
+  gap: $spaceSize;
+
+  .demo-card {
+    border: 1px solid $frameColorLight;
+    border-radius: $borderRadius;
+    padding: $spaceSize;
+    background-color: #fff;
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: $spaceSize;
+      font-size: 1.2em;
+      border-bottom: 1px solid lighten($frameColorLight, 30%);
+      padding-bottom: 0.4rem;
+      color: $frameColorDark;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: $spaceSize;
+      margin-bottom: $spaceSize;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+
+      label {
+        font-size: 0.85em;
+        color: lighten($frameColorDark, 20%);
+      }
+
+      .form-control {
+        padding: $normalPadding;
+        border: 1px solid $frameColorLight;
+        border-radius: $borderRadius;
+        font-family: inherit;
+        font-size: 0.95em;
+
+        &:focus {
+          outline: none;
+          border-color: $accentColor;
+        }
+      }
+
+      .button-group {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+
+        .btn-preset {
+          padding: 0.3em 0.6em;
+          font-size: 0.8em;
+          border: 1px solid $frameColorLight;
+          background: #f8f9fa;
+          border-radius: $borderRadius;
+          cursor: pointer;
+
+          &:hover {
+            background: $activeBg;
+          }
+        }
+      }
+    }
+
+    .results-box {
+      background-color: #f8f9fa;
+      border-radius: $borderRadius;
+      padding: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.9em;
+
+      .val-badge {
+        font-family: "Consolas", monospace;
+        background: #e9ecef;
+        padding: 0.1em 0.4em;
+        border-radius: 0.2rem;
+        color: #d9534f;
+      }
+
+      .val-smarttime {
+        font-weight: bold;
+        color: $accentColor;
+      }
+    }
+  }
+}

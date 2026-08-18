@@ -1,9 +1,144 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/style.scss to edit this template
-*/
-/*
-    Created on : 17 авг. 2026 г., 11:25:46
-    Author     : AlexCRAZY74
-*/
+@charset "utf-8";
 
+$spaceSize: 1.5rem;
+$frameColorLight: #8a8888;
+$frameColorDark: #333;
+$borderRadius: 0.3rem;
+
+$normalSpaceHorizontal: 0.8em;
+$normalSpaceVertical:   0.4em;
+$normalPadding:         $normalSpaceVertical $normalSpaceHorizontal;
+
+$accentColor: #0275d8;
+$activeBg: #e9ecef;
+
+@mixin normalfont($size, $textColor: #000){
+  font-family: "Calibri", "Consolas", "Tahoma", "Arial", sans-serif;
+  font-weight: 500;
+  font-size: $size;
+  line-height: $size * 1.3;
+  color: $textColor;
+}
+
+html, body {
+  @include normalfont(15pt);
+  height: 100%;
+  background-color: #fff;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+.wrapper {
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 $spaceSize;
+}
+
+/* --- Navigation & Header --- */
+
+header {
+  border-bottom: 1px solid $frameColorLight;
+  padding: $spaceSize 0;
+  background-color: #f8f9fa;
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spaceSize;
+
+    ul.navigate-menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+
+      li {
+        a, span {
+          display: inline-block;
+          padding: $normalPadding;
+          border-radius: $borderRadius;
+          text-decoration: none;
+          font-size: 0.9em;
+        }
+
+        a {
+          color: $accentColor;
+
+          &:hover {
+            background-color: lighten($activeBg, 3%);
+            text-decoration: underline;
+          }
+        }
+
+        &.active {
+          span {
+            background-color: $activeBg;
+            color: $frameColorDark;
+            font-weight: bold;
+          }
+        }
+      }
+
+      &.lang {
+        li {
+          a, span {
+            font-size: 0.8em;
+            text-transform: uppercase;
+          }
+        }
+      }
+    }
+  }
+
+  h1 {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.6em;
+    color: $frameColorDark;
+  }
+
+  .decription {
+    font-size: 0.9em;
+    color: lighten($frameColorDark, 25%);
+  }
+}
+
+/* --- Layout Structure --- */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+article {
+  flex: 1 0 auto;
+  padding: $spaceSize 0;
+
+  .content {
+    min-height: 200px;
+  }
+}
+
+footer {
+  flex-shrink: 0;
+  border-top: 1px solid $frameColorLight;
+  padding: $spaceSize 0;
+  font-size: 0.85em;
+  color: $frameColorDark;
+  background-color: #f8f9fa;
+
+  span[style*="transform"] {
+    font-weight: bold;
+  }
+}
+
+@import "quantities";

@@ -1,0 +1,13 @@
+{% extends "template.base.twig" %}
+{% block body %}
+  <body>
+		<header><div class="wrapper">
+				<nav>{{ inset('navigate') }} {{ inset('select_lang') }}</nav>
+				<h1>{{ this.title }}</h1>
+				<div class="decription">{{ text('pages', this.PageID, 'description') }}</div>
+			</div></header>
+			<article><div class="wrapper">{% block content %}<div class="content">main content</div>{% endblock %}</div></article>
+		<footer><div class="wrapper"><span><span style="-webkit-transform: scaleX(-1); -moz-transform: scaleX(-1); -o-transform: scaleX(-1); -khtml-transform: scaleX(-1); -ms-transform: scaleX(-1); transform: scaleX(-1); display: inline-block;">&copy;</span>
+ Copyleft. AlexCRAZY74. 2026</span></div></footer>
+  </body>
+{% endblock %}  

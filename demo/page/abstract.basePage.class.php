@@ -31,9 +31,7 @@ abstract class basePage extends \TwigPage {
 			$this->pageJS = $scriptName;
 		}
 
-		if ($debug) {
-			console::log('$this', $this);
-		}
+		//if ($debug) console::log('$this', $this);
 
 		console::groupEnd();
 	}

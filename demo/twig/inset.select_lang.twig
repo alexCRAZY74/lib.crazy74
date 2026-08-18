@@ -1,0 +1,12 @@
+<ul class="navigate-menu lang">
+	{% if parent.languageCode == 'ru' %}
+		<li class="active"><span title="Русский">RUS</span></li>
+	{% else %}
+		<li><a href="{{ pageURL( parent.PageID, 'ru' ) }}" title="Русский">RUS</a></li>
+	{% endif %}
+	{% if parent.languageCode == 'en' %}
+		<li class="active"><span title="English">ENG</span></li>
+	{% else %}
+		<li><a href="{{ pageURL( parent.PageID, 'en' ) }}" title="English">ENG</a></li>
+	{% endif %}
+</ul>

@@ -1,11 +1,156 @@
-@charset "UTF-8";
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/style.scss to edit this template
-*/
-/*
-    Created on : 17 авг. 2026 г., 11:25:46
-    Author     : AlexCRAZY74
-*/
+html, body {
+  font-family: "Calibri", "Consolas", "Tahoma", "Arial", sans-serif;
+  font-weight: 500;
+  font-size: 15pt;
+  line-height: 19.5pt;
+  color: #000;
+  height: 100%;
+  background-color: #fff;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0; }
+
+*, *:before, *:after {
+  box-sizing: inherit; }
+
+.wrapper {
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.5rem; }
+
+/* --- Navigation & Header --- */
+header {
+  border-bottom: 1px solid #8a8888;
+  padding: 1.5rem 0;
+  background-color: #f8f9fa; }
+  header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem; }
+    header nav ul.navigate-menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem; }
+      header nav ul.navigate-menu li a, header nav ul.navigate-menu li span {
+        display: inline-block;
+        padding: 0.4em 0.8em;
+        border-radius: 0.3rem;
+        text-decoration: none;
+        font-size: 0.9em; }
+      header nav ul.navigate-menu li a {
+        color: #0275d8; }
+        header nav ul.navigate-menu li a:hover {
+          background-color: #f2f4f5;
+          text-decoration: underline; }
+      header nav ul.navigate-menu li.active span {
+        background-color: #e9ecef;
+        color: #333;
+        font-weight: bold; }
+      header nav ul.navigate-menu.lang li a, header nav ul.navigate-menu.lang li span {
+        font-size: 0.8em;
+        text-transform: uppercase; }
+  header h1 {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.6em;
+    color: #333; }
+  header .decription {
+    font-size: 0.9em;
+    color: #737373; }
+
+/* --- Layout Structure --- */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; }
+
+article {
+  flex: 1 0 auto;
+  padding: 1.5rem 0; }
+  article .content {
+    min-height: 200px; }
+
+footer {
+  flex-shrink: 0;
+  border-top: 1px solid #8a8888;
+  padding: 1.5rem 0;
+  font-size: 0.85em;
+  color: #333;
+  background-color: #f8f9fa; }
+  footer span[style*="transform"] {
+    font-weight: bold; }
+
+/* --- Demo Cards Layout --- */
+.quantities-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; }
+  .quantities-demo .demo-card {
+    border: 1px solid #8a8888;
+    border-radius: 0.3rem;
+    padding: 1.5rem;
+    background-color: #fff; }
+    .quantities-demo .demo-card h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 1.2em;
+      border-bottom: 1px solid #d6d5d5;
+      padding-bottom: 0.4rem;
+      color: #333; }
+    .quantities-demo .demo-card .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem; }
+    .quantities-demo .demo-card .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem; }
+      .quantities-demo .demo-card .form-group label {
+        font-size: 0.85em;
+        color: #666666; }
+      .quantities-demo .demo-card .form-group .form-control {
+        padding: 0.4em 0.8em;
+        border: 1px solid #8a8888;
+        border-radius: 0.3rem;
+        font-family: inherit;
+        font-size: 0.95em; }
+        .quantities-demo .demo-card .form-group .form-control:focus {
+          outline: none;
+          border-color: #0275d8; }
+      .quantities-demo .demo-card .form-group .button-group {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap; }
+        .quantities-demo .demo-card .form-group .button-group .btn-preset {
+          padding: 0.3em 0.6em;
+          font-size: 0.8em;
+          border: 1px solid #8a8888;
+          background: #f8f9fa;
+          border-radius: 0.3rem;
+          cursor: pointer; }
+          .quantities-demo .demo-card .form-group .button-group .btn-preset:hover {
+            background: #e9ecef; }
+    .quantities-demo .demo-card .results-box {
+      background-color: #f8f9fa;
+      border-radius: 0.3rem;
+      padding: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.9em; }
+      .quantities-demo .demo-card .results-box .val-badge {
+        font-family: "Consolas", monospace;
+        background: #e9ecef;
+        padding: 0.1em 0.4em;
+        border-radius: 0.2rem;
+        color: #d9534f; }
+      .quantities-demo .demo-card .results-box .val-smarttime {
+        font-weight: bold;
+        color: #0275d8; }
 
 /*# sourceMappingURL=styles.css.map */

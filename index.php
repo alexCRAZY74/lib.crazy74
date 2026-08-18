@@ -30,6 +30,10 @@ if (is_readable($serverShared)) {
   require_once $localShared;
 }
 
+if (defined('PHPDEBUG_MODE_OUTPUT') && PHPDEBUG_MODE_OUTPUT) {
+	lang::ClearCache();
+}
+
 // Перехват и диспетчеризация AJAX-запросов (контроллер class / method)
 // Если запрос адресован бэкенд-обработчику, App::ajax() отдаст ответ и завершит работу
 if (App::ajax()) {
