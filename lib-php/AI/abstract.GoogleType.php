@@ -31,8 +31,13 @@ abstract class GoogleType extends API {
 		}
 	}
 
+	protected function GetApiKeys(): array {
+    return static::API_KEYS;
+	}
+
+	#[\Override]
 	protected function MakeREST(): ?\REST\HTTP {
-		$keys = static::API_KEYS;
+		$keys = static::GetApiKeys();
 		if (empty($keys)) {
 			return null;
 		}
@@ -56,6 +61,7 @@ abstract class GoogleType extends API {
 		return $http;
 	}
 
+	#[\Override]
 	protected function MakeDATA(Request $request, Response $response): array {
 		$data = parent::MakeDATA($request, $response);
 		$data['generationConfig'] = [
@@ -65,6 +71,7 @@ abstract class GoogleType extends API {
 		return $data;
 	}
 
+	#[\Override]
 	protected function ParseAnswer(mixed $answer): array {
 		$parsedResponse = [
 			'text_list' => [],

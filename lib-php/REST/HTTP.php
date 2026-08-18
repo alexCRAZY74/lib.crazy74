@@ -37,16 +37,13 @@ class HTTP {
 
 		$url = '';
 		if (is_string($this->webhookUrl) && !empty($this->webhookUrl)) {
-			$command = !empty($arguments) ? array_shift($arguments) : null;
-
 			$url = match ($this->CommandType) {
-				self::COMMAND_AS_PATH => $this->webhookUrl . (string) $command,
-				self::COMMAND_AS_JSON_FILE => $this->webhookUrl . (string) $command . '.json',
+				static::COMMAND_AS_PATH => $this->webhookUrl . (string) (!empty($arguments) ? array_shift($arguments) : ''),
+				static::COMMAND_AS_JSON_FILE => $this->webhookUrl . (string) (!empty($arguments) ? array_shift($arguments) : '') . '.json',
 				default => $this->webhookUrl,
 			};
 
 			if ($debug) {
-				console::log('$command', $command);
 				console::log('$url', $url);
 			}
 

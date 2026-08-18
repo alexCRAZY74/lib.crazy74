@@ -1,9 +1,33 @@
 {
 	"pages": {
-		"index": {},
-		"quantities": {},
-		"rest_api": {},
-		"ai_integration": {},
-		"ui_templates": {}
+		"index": {
+			"menu-item": "System",
+			"title": "System, Requests & Debugging",
+			"description": "Demonstration of core functionality, sessions, localization, and direct debug dump ?debug=yes"
+		},
+		"quantities": {
+			"menu-item": "Numbers & Dates",
+			"title": "Quantities, Numbers & Dates",
+			"description": "Formatting bytes, numbers, inflections, and dynamic SmartTime"
+		},
+		"rest_api": {
+			"menu-item": "REST API",
+			"title": "REST API & AJAX Exchange",
+			"description": "Endpoint testing, response handling, and server.js operation"
+		},
+		"ai_integration": {
+			"menu-item": "AI Interface",
+			"title": "AI Integration & Providers",
+			"description": "Testing Gemini / OpenAI API, response parsing, and JSON schemas"
+		},
+		"ui_templates": {
+			"menu-item": "Twig & UI",
+			"title": "TwigPage Templating & UI",
+			"description": "Component rendering, headLinkFile version control, and blocks"
+		}
+	},
+	"common": {
+		"debug_mode": "Debug Mode",
+		"lang_switch": "Language"
 	}
 }

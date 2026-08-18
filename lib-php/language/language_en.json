@@ -1,0 +1,40 @@
+{
+	"date": {
+		"today": "today",
+		"yesterday": "yesterday",
+		"before_yesterday": "day before yesterday",
+		"tomorrow": "tomorrow",
+		"aftertomorrow": "day after tomorrow",
+		"neverdate": "never",
+		"just_now": "just now",
+		"ago": "ago",
+		"locale_format": "m/d/Y",
+		"locale_format_with_time": "m/d/Y H:i",
+		"locale_format_short": "m/d/y",
+		"locale_format_short_with_time": "m/d/y H:i",
+		"monthsformat": [
+			"January", "February", "March", "April", "May", "June",
+			"July", "August", "September", "October", "November", "December"
+		],
+		"units": {
+			"second": ["second", "seconds", "seconds"],
+			"minute": ["minute", "minutes", "minutes"],
+			"hour": ["hour", "hours", "hours"],
+			"day": ["day", "days", "days"]
+		}
+	},
+	"monthsformat": [
+		"January", "February", "March", "April", "May", "June",
+		"July", "August", "September", "October", "November", "December"
+	],
+	"numbers": {
+		"postfix": {
+			"kilo": "K",
+			"mega": "M",
+			"giga": "B"
+		},
+		"units": {
+			"pcs": ["piece", "pieces", "pieces"]
+		}
+	}
+}

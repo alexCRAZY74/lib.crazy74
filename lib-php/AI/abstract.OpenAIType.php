@@ -31,9 +31,13 @@ abstract class OpenAIType extends API {
 			}
 		}
 	}
+	
+	protected function GetApiKeys(): array {
+    return static::API_KEYS;
+	}
 
 	protected function MakeREST(): ?\REST\HTTP {
-		$keys = static::API_KEYS;
+		$keys = static::GetApiKeys();
 		if (empty($keys)) {
 			return null;
 		}
@@ -57,7 +61,8 @@ abstract class OpenAIType extends API {
 		return $http;
 	}
 
-	protected function MakeDATA(&$request, &$response): array {
+	#[\Override]
+	protected function MakeDATA(Request $request, Response $response): array {
 		$data = [
 			'model' => $this->model,
 			'messages' => [],
