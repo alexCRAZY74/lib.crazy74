@@ -1,0 +1,14 @@
+{% extends "template.plain.twig" %}
+
+{% block content %}
+<div class="content">
+	<h3>Тестирование интеграции с ИИ</h3>
+	<p>Проверка работы провайдеров <code>AIGemini</code> и <code>AIOpenRouter</code> через отладочный метод <code>App::TestAI()</code>.</p>
+	<ul>
+		<li><b>Выбор провайдера:</b> Автоматическое переключение на <code>AIOpenRouter</code>, если запрошенная модель присутствует в <code>\AIOpenRouter::MODELS</code>, иначе используется <code>AIGemini</code>.</li>
+		<li><b>Параметры:</b> Модель принимает из параметра <code>model</code> (по умолчанию <code>gemini-flash-latest</code>).</li>
+		<li><b>Проверка:</b> Формирует объект <code>\AI\Request</code> с контрольным вопросом <i>«Ты знаешь свою модель?»</i>, выполняет запрос и логирует результат и ошибки в консоль отладки.</li>
+		<li><b>Отладочный запуск:</b> <a href="/?debug=yes&class=App&method=TestAI" target="_blank">/?debug=yes&class=App&method=TestAI</a></li>
+	</ul>
+</div>
+{% endblock %}

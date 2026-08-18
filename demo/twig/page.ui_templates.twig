@@ -1,0 +1,12 @@
+{% extends "template.plain.twig" %}
+
+{% block content %}
+<div class="content">
+	<p>Страница демонстрирует трехслойную архитектуру шаблонизации TwigPage:</p>
+	<ul>
+		<li><code>template.base.twig</code> — базовый HTML-каркас, управление мета-тегами, версионирование ресурсов через <code>headLinkFile</code>, инициализация клиентского JS-окружения и словарей локализации.</li>
+		<li><code>template.plain.twig</code> — стандартная разметка страницы: шапка с навигацией (<code>inset('navigate')</code>, <code>inset('select_lang')</code>), заголовок, описание из локализации и подвал.</li>
+		<li><code>ui_templates.twig</code> — конечный шаблон конкретной страницы, определяющий содержимое блока <code>content</code>.</li>
+	</ul>
+</div>
+{% endblock %}
