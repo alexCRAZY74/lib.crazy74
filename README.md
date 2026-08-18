@@ -1,123 +1,132 @@
+**English** | [Русский](README_RU.md)
+
+---
+
 # lib.crazy74
 
-Автономная универсальная библиотека компонентов для PHP (8.2+) и JavaScript, предназначенная для использования в качестве первичного ядра и фундамента веб-приложений без жесткой привязки к Composer и внешним фреймворкам.
+A standalone, universal component library for PHP (8.2+) and JavaScript, designed as a core foundation for web applications without hard dependencies on Composer or monolithic external frameworks.
 
-Библиотека поставляется как самостоятельный модуль, подключаемый к любому PHP-проекту.
-
----
-
-## Что это: библиотека или фреймворк?
-
-И то, и другое — в зависимости от того, как подключать.
-
-* **`lib-php`** и **`lib-js`** — независимые друг от друга слои. Каждый можно взять по отдельности и встроить в существующий проект: серверное ядро не требует наличия JS-части, а `lib.crazy74.js`/`lib.crazy74.jquery.js` прекрасно работают и без PHP-бэкенда library, как самостоятельные утилиты на любой странице.
-* **Вместе** оба слоя, объединённые общей точкой входа (`common.php` → `App::startup()` / `App::ajax()`), общим автозагрузчиком (`SharedCommon::auto_load`) и единым слоем локализации, по сути образуют **легковесный фреймворк** для веб-сайта: единая точка входа, контроллеры страниц (`TwigPage`), AJAX-диспетчер, работа с БД, сервисы отладки — всё необходимое ядро без лишнего веса и без навязанных соглашений «фреймворков-комбайнов».
-
-Ядро сознательно минималистично и не пытается закрыть все возможные сценарии само по себе — вместо этого оно **проектируется как база для расширения**. Практически все ключевые PHP-классы (`\core\lang`, `\core\session`, `\core\dates`, `App`, `TwigPage`, `AI\API`, `AI\Response` и др.) построены как абстрактные классы или классы, рассчитанные на наследование, а не как готовые к прямому использованию финальные решения:
-
-* `lang`, `session`, `dates` — глобальные псевдонимы-наследники (`class X extends \core\X`), через которые проект может переопределить или дополнить поведение ядра, не трогая исходники библиотеки.
-* `App` и `TwigPage` — базовые абстракции контроллера и страницы; конкретные страницы и сервисы проекта наследуются от них.
-* `AI\API`, `AI\Request`, `AI\Response` — построены по схеме Template Method специально для того, чтобы под конкретного LLM-провайдера писался только тонкий класс-наследник (см. `AI\GoogleType`, `AI\OpenAIType` как примеры).
-
-За счёт этого библиотеку можно расширять практически бесконечно — под конкретный проект, добавляя свои корневые директории в `$_ROOTFOLDERS`, свои языковые словари, свои контроллеры и свои классы-наследники ядра, не модифицируя сам `lib.crazy74`.
+The library is delivered as an independent module that can be integrated into any PHP project.
 
 ---
 
-## Архитектурные принципы
+## Is it a Library or a Framework?
 
-* **Полная автономность:** Компоненты PHP и JS функционируют без сторонних менеджеров пакетов и сложных цепочек сборки.
-* **Расширяемость через наследование:** Ядро PHP спроектировано как набор базовых классов и абстракций — проектный код встраивается через наследование, а не через модификацию библиотеки.
-* **Единый слой локализации:** Общие словари и структуры языковых данных, доступные одновременно на PHP-бэкенде и JS-фронтенде.
-* **Строгая типизация:** PHP-часть оптимизирована под PHP 8.2+ с объявлением `declare(strict_types=1)`.
+Both — depending on how you integrate it.
 
----
+* **`lib-php`** and **`lib-js`** are completely decoupled layers. Each can be used independently in an existing project: the backend core does not require the frontend JS layer, and `lib.crazy74.js`/`lib.crazy74.jquery.js` function seamlessly as standalone frontend utilities on any web page without the PHP backend.
+* **Together**, combined via a unified entry point (`common.php` → `App::startup()` / `App::ajax()`), a shared class autoloader (`SharedCommon::auto_load`), and a unified localization layer, both layers form a **lightweight web framework**: single entry point, page controllers (`TwigPage`), AJAX dispatcher, database abstraction, and debugging services — providing essential core architecture without bloat or rigid framework conventions.
 
-## Структура библиотеки и документация
+The core is intentionally minimalistic and does not attempt to cover every scenario out-of-the-box — instead, it is **designed as an extensible base**. Nearly all key PHP classes (`\core\lang`, `\core\session`, `\core\dates`, `App`, `TwigPage`, `AI\API`, `AI\Response`, etc.) are implemented as abstract classes or designed specifically for class inheritance rather than direct usage:
 
-### 1. Клиентский слой (`/lib-js`)
-Содержит автономную клиентскую библиотеку и плагины для jQuery — можно подключать независимо от PHP-части:
-* `lib.crazy74.js` — базовая библиотека JavaScript (управление DOM, манипуляция объектами, Cookie, Storage, события, локализация).
-* `lib.crazy74.jquery.js` — набор расширений и UI-плагинов для jQuery.
+* `lang`, `session`, `dates` — global aliases (`class X extends \core\X`) allowing project-level code to override or extend core functionality without modifying library source code.
+* `App` and `TwigPage` — base abstractions for application controllers and page rendering; specific application pages and services inherit from them.
+* `AI\API`, `AI\Request`, `AI\Response` — built around the Template Method design pattern, requiring only thin provider-specific subclasses for individual LLM services (e.g., `AI\GoogleType`, `AI\OpenAIType`).
 
-Подробная документация:
-* [Инструкция по lib.crazy74.js](lib.crazy74.md)
-* [Инструкция по lib.crazy74.jquery.js](lib.crazy74.jquery.md)
-
-### 2. Серверное ядро (`/lib-php`)
-Содержит фундаментальные абстракции и сервисы, рассчитанные на наследование в проектном коде:
-* Единый автозагрузчик классов и трейтов (`SharedCommon::auto_load`).
-* Абстракция базового приложения (`App`).
-* Работа с базой данных MySQL (`\core\mysqli_db`).
-* Система рендеринга и шаблонизации Twig (`TwigPage`).
-* Сервисы перехвата ошибок, логирования и отладки (`errors`, `debug`, `console`).
-* Модуль интеграции с LLM-провайдерами (`AI\API`, `AI\Request`, `AI\Response`, `AI\GoogleType`, `AI\OpenAIType`).
-
-Подробная документация:
-* [Описание PHP-компонентов (php-shared-lib.md)](php-shared-lib.md)
-
-### 3. Демонстрационное приложение (`/demo`)
-Эталонная реализация сайта на базе `lib-php` + `lib-js`, показывающая связку всех слоёв воедино (единая точка входа, контроллеры страниц, AJAX, интеграция с AI). См. [PROJECT.md](PROJECT.md).
+As a result, the library can be extended infinitely for any specific project by registering custom root directories in `$_ROOTFOLDERS`, adding language dictionaries, custom controllers, and child classes, all while keeping `lib.crazy74` source code untouched.
 
 ---
 
-## Подключение и автозагрузка классов (PHP)
+## Architectural Principles
 
-Автозагрузка классов и трейтов в библиотеке реализована через статический метод `SharedCommon::auto_load()`, который регистрируется с помощью `spl_autoload_register()`.
+* **Full Autonomy:** PHP and JS components operate without third-party package managers or complex build pipelines.
+* **Extensibility via Inheritance:** The PHP core is designed as a set of base classes and abstractions — application code integrates via inheritance rather than modifying library source code.
+* **Unified Localization Layer:** Shared dictionaries and language data structures accessible simultaneously across PHP backend and JS frontend.
+* **Strict Typing:** The PHP codebase is optimized for PHP 8.2+ with mandatory `declare(strict_types=1)` support.
 
-Метод `auto_load` осуществляет поиск файлов классов и трейтов в директориях, определенных в глобальном массиве `$_ROOTFOLDERS`. Поиск производится по следующим паттернам именования файлов:
-* `class.ИмяКласса.php`
-* `abstract.ИмяКласса.php`
-* `ИмяКласса.class.php`
-* `trait.ИмяТрейта.php`
-* `ИмяТрейта.trait.php`
+---
 
-При подключении `common.php` сразу вызывается `App::startup()`. Это поведение управляется константой `APP_AUTOSTART` (по умолчанию `true`) — определите `APP_AUTOSTART` как `false` до `require_once`, если нужен только автозагрузчик без немедленного старта приложения. Легаси-автозагрузчик Twig 1.x подключается опционально: если файла `Twig/Autoloader.php` нет или он нечитаем, `common.php` просто пропускает этот блок без фатальной ошибки.
+## Library Structure and Documentation
 
-### Пример инициализации точки входа
+### 1. Frontend Layer (`/lib-js`)
+Contains the standalone client-side JavaScript library and jQuery plugins, usable independently from the PHP layer:
+* `lib.crazy74.js` — core JavaScript library (DOM manipulation, object utilities, Cookie & Storage management, event handling, localization).
+* `lib.crazy74.jquery.js` — extensions and UI plugins for jQuery.
+
+Detailed Documentation:
+* [lib.crazy74.js Documentation](lib.crazy74.md)
+* [lib.crazy74.jquery.js Documentation](lib.crazy74.jquery.md)
+
+### 2. Backend Core (`/lib-php`)
+Contains core abstractions and backend services designed for project-level inheritance:
+* Class and trait autoloader (`SharedCommon::auto_load`).
+* Base application abstraction (`App`).
+* MySQL database wrapper (`\core\mysqli_db`).
+* Twig templating and rendering engine (`TwigPage`).
+* Error handling, logging, and debugging services (`errors`, `debug`, `console`).
+* LLM provider integration module (`AI\API`, `AI\Request`, `AI\Response`, `AI\GoogleType`, `AI\OpenAIType`).
+
+Detailed Documentation:
+* [PHP Components Description (php-shared-lib.md)](php-shared-lib.md)
+
+### 3. Demo Application (`/demo`)
+A reference site implementation based on `lib-php` + `lib-js`, demonstrating end-to-end layer integration (single entry point, page controllers, AJAX, AI integration). See [PROJECT.md](PROJECT.md).
+
+---
+
+## Integration and Class Autoloading (PHP)
+
+Class and trait autoloading is handled by the static method `SharedCommon::auto_load()`, which is registered via `spl_autoload_register()`.
+
+The `auto_load` method recursively scans directories listed in the global `$_ROOTFOLDERS` array for class and trait files matching these naming conventions:
+* `class.ClassName.php`
+* `abstract.ClassName.php`
+* `ClassName.class.php`
+* `trait.TraitName.php`
+* `TraitName.trait.php`
+
+Including `common.php` triggers `App::startup()` immediately. This behavior is controlled by the `APP_AUTOSTART` constant (defaults to `true`) — set `APP_AUTOSTART` to `false` before `require_once` if you only need the autoloader without auto-starting the application. The legacy Twig 1.x autoloader is optionally included: if `Twig/Autoloader.php` is missing or unreadable, `common.php` gracefully skips it without throwing a fatal error.
+
+### Entry Point Setup Example
 
 ```php
-// 1. Определение корневых каталогов для сканирования автозагрузчиком.
-// Метод SharedCommon::auto_load() рекурсивно ищет файлы классов и трейтов
-// по заданным паттернам во всех поддиректориях указанных корневых путей.
-// Рекомендуется использовать __DIR__ для относительных путей.
+// 1. Define root directories for autoloader scanning.
+// SharedCommon::auto_load() recursively searches for class and trait files
+// matching target patterns across all subdirectories of these root paths.
+// Using __DIR__ for relative paths is recommended.
 $_ROOTFOLDERS = [
-    __DIR__ . '/lib-php/', // Корневая директория библиотеки lib.crazy74
-    // ... другие корневые директории вашего проекта,
-    // например: __DIR__ . '/app/',
+    __DIR__ . '/lib-php/', // Core library directory for lib.crazy74
+    // ... additional project-specific root directories,
+    // e.g., __DIR__ . '/app/',
 ];
 
-// 2. (опционально) Отключить автоматический запуск приложения при подключении common.php
+// 2. (Optional) Disable automatic application startup on common.php load
 // define('APP_AUTOSTART', false);
 
-// 3. Подключение базового файла библиотеки
+// 3. Include the core library bootstrap file
 require_once __DIR__ . '/lib-php/common.php';
 
-// 4. Регистрация автозагрузчика
+// 4. Register the autoloader
 spl_autoload_register(['SharedCommon', 'auto_load']);
+
 ```
 
-Это обеспечивает гибкую и расширяемую систему автозагрузки для всех компонентов библиотеки, а собственные корневые директории проекта (`$_ROOTFOLDERS`) — тот механизм, через который наследники базовых классов ядра встраиваются в общую систему.
+This provides a flexible and extensible autoloading architecture for all library components. Adding custom root directories to `$_ROOTFOLDERS` enables application-level subclasses to integrate seamlessly into the core autoloader framework.
 
 ---
 
-## Инструкции для ИИ-ассистентов
+## AI Assistant Instructions
 
-Библиотека изначально проектируется с расчётом на генерацию и поддержку кода при участии LLM (Claude, Gemini, GPT и т.п.). Для этого в репозитории поддерживаются **тренер-файлы** — технические справочники, описывающие поведение API на уровне деталей и известных «ловушек», недоступных из простого чтения исходников:
+The library is designed from the ground up to support code generation and maintenance by LLMs (Claude, Gemini, GPT, etc.). To facilitate this, the repository includes **trainer files** — technical reference manuals detailing API behaviors, architectural constraints, and subtle edge cases not evident from code inspection alone:
 
-* [`lib.crazy74.md`](lib.crazy74.md) — поведение серверного PHP-ядра.
-* [`lib.crazy74.jquery.md`](lib.crazy74.jquery.md) — поведение клиентского JS/jQuery-слоя.
-* [`php-shared-lib.md`](php-shared-lib.md) — детальное описание PHP-компонентов (автозагрузчик, `App`, `TwigPage`, БД, AI-интеграция и т.д.).
-* [`PROJECT.md`](PROJECT.md) — архитектура репозитория и демо-приложения в целом.
+* [`lib.crazy74.md`](https://www.google.com/search?q=lib.crazy74.md) — Server-side PHP core behavior.
+* [`lib.crazy74.jquery.md`](https://www.google.com/search?q=lib.crazy74.jquery.md) — Client-side JS/jQuery layer behavior.
+* [`php-shared-lib.md`](https://www.google.com/search?q=php-shared-lib.md) — In-depth reference for PHP components (autoloader, `App`, `TwigPage`, DB, AI integration, etc.).
+* [`PROJECT.md`](https://www.google.com/search?q=PROJECT.md) — Architecture overview of the repository and demo application.
 
-Перед генерацией или правкой кода в этом репозитории ИИ-ассистенту следует:
+Before generating or modifying code in this repository, AI assistants MUST:
 
-1. Прочитать соответствующий тренер-файл(ы) для затрагиваемого слоя (`lib-php` / `lib-js`), а не полагаться только на исходный код или общие знания о PHP/jQuery.
-2. Обращать внимание на разделы «Общие ловушки для генерации кода» в конце каждого тренер-файла — там перечислены неочевидные различия в поведении (например, `$.isEmpty` vs `crazy74.array.notEmpty`, секунды vs миллисекунды в датах, двойное поведение `maxZIndex`).
-3. Расширять ядро **через наследование**, а не через модификацию базовых классов библиотеки — это касается `lang`, `session`, `dates`, `App`, `TwigPage`, `AI\API` и их наследников.
-4. Для интеграции самих тренер-файлов в LLM-запросы внутри проекта использовать штатный механизм `AI\Request::AddTrainerFile()` — он читает файл с диска и оборачивает его в псевдо-HTTP-заголовок с корректным `Content-Type` (`md`/`markdown` → `text/markdown`).
+1. Read the relevant trainer file(s) for the affected layer (`lib-php` / `lib-js`) rather than relying solely on raw source code or generic PHP/jQuery knowledge.
+2. Pay special attention to the "Common Code Generation Pitfalls" sections at the end of each trainer file — these highlight critical behavioral differences (e.g., `$.isEmpty` vs `crazy74.array.notEmpty`, seconds vs milliseconds in date utilities, dual `maxZIndex` behavior).
+3. Extend core functionality **via inheritance**, never by modifying library base classes directly — this applies to `lang`, `session`, `dates`, `App`, `TwigPage`, `AI\API`, and their subclasses.
+4. To attach trainer files directly to LLM API prompts within the application, use the built-in helper `AI\Request::AddTrainerFile()` — it reads the file from disk and wraps it as a pseudo-HTTP header with the proper `Content-Type` (`md`/`markdown` → `text/markdown`).
 
 ---
 
-## Автор
+## Author
 
-Библиотеку разрабатывает и поддерживает AlexCRAZY74 (Almaty, KZ) — [alexcrazy74.taplink.kz](https://alexcrazy74.taplink.kz/)
+Developed and maintained by AlexCRAZY74 (Almaty, KZ):
+
+* [alexcrazy74.taplink.kz](https://alexcrazy74.taplink.kz/)
+* [linktr.ee/AlexCRAZY74](https://linktr.ee/AlexCRAZY74)
+
