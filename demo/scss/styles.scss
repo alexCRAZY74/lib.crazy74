@@ -12,6 +12,15 @@ $normalPadding:         $normalSpaceVertical $normalSpaceHorizontal;
 $accentColor: #0275d8;
 $activeBg: #e9ecef;
 
+$codeFontName:   "Courier New", monospace;
+$codeFontWeight: 600;
+
+$uiBorderRadius:        3px !default;
+$uiControlShadow:       0 8px 24px rgba(0, 0, 0, 0.2) !default;
+
+$uiFontSize:            0.9em !default;
+
+
 @mixin normalfont($size, $textColor: #000){
   font-family: "Calibri", "Consolas", "Tahoma", "Arial", sans-serif;
   font-weight: 500;
@@ -127,6 +136,10 @@ article {
     min-height: 200px;
   }
 }
+code {
+	font-family: $codeFontName;
+	font-weight: $codeFontWeight;
+}
 
 footer {
   flex-shrink: 0;
@@ -141,4 +154,12 @@ footer {
   }
 }
 
+@import "../../scss/cls74-window";
+@import "../../scss/cls74-menu";
+@import "../../scss/cls74-controls";
+@import "icons";
+@import "controls";
+@import "layout";
+
 @import "quantities";
+@import "ui_templates";

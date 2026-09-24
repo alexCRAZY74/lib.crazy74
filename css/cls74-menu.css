@@ -1,0 +1,58 @@
+@charset "UTF-8";
+/* стили csl74-menu */
+/* Базовые переменные палитры NetBeans с фолбеками */
+/* Цвет выделения / ховера */
+/* Для акцентных / danger элементов */
+/* Для disabled / subtext */
+.csl74-menu-container {
+  position: absolute;
+  z-index: 9999;
+  background: #f0f0f0;
+  color: #000000;
+  border: 1px solid #cccccc;
+  border-radius: 3px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+  padding: 0; }
+  .csl74-menu-container .csl74-menu-list {
+    list-style: none;
+    margin: 0.4rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column; }
+  .csl74-menu-container .csl74-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    color: #000000; }
+    .csl74-menu-container .csl74-menu-item:hover {
+      background-color: #b8d1f3; }
+    .csl74-menu-container .csl74-menu-item.danger {
+      color: #0000e6; }
+      .csl74-menu-container .csl74-menu-item.danger .csl74-menu-icon {
+        background-color: #0000e6; }
+    .csl74-menu-container .csl74-menu-item.disabled {
+      color: #808080;
+      cursor: default;
+      pointer-events: none;
+      opacity: 0.6; }
+      .csl74-menu-container .csl74-menu-item.disabled .csl74-menu-icon {
+        background-color: #808080; }
+    .csl74-menu-container .csl74-menu-item .csl74-menu-label {
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis; }
+    .csl74-menu-container .csl74-menu-item .csl74-menu-subtext {
+      color: #808080;
+      margin-left: 0.8rem; }
+  .csl74-menu-container .csl74-menu-divider {
+    height: 1px;
+    background: #cccccc;
+    margin: 0.4rem 0;
+    padding: 0;
+    pointer-events: none; }
+
+/*# sourceMappingURL=cls74-menu.css.map */

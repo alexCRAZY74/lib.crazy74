@@ -1,12 +1,87 @@
 {% extends "template.plain.twig" %}
 
 {% block content %}
-<div class="content">
-	<p>Страница демонстрирует трехслойную архитектуру шаблонизации TwigPage:</p>
-	<ul>
-		<li><code>template.base.twig</code> — базовый HTML-каркас, управление мета-тегами, версионирование ресурсов через <code>headLinkFile</code>, инициализация клиентского JS-окружения и словарей локализации.</li>
-		<li><code>template.plain.twig</code> — стандартная разметка страницы: шапка с навигацией (<code>inset('navigate')</code>, <code>inset('select_lang')</code>), заголовок, описание из локализации и подвал.</li>
-		<li><code>ui_templates.twig</code> — конечный шаблон конкретной страницы, определяющий содержимое блока <code>content</code>.</li>
-	</ul>
+	<div class="content">
+		<div class="ui-demo">
+			<div class="demo-card">
+				<h2>Мульти-объектное позиционирование</h2>
+				<div id="positions-demo-area" class="pos-sandbox">
+					<!-- Плавающий элемент -->
+					<div id="demo-popper" class="demo-popper">Popper</div>
+
+					<!-- Ориентир A (задает X) -->
+					<div id="target-x" class="demo-target target-a">Target A (X)</div>
+
+					<!-- Ориентир B (задает Y) -->
+					<div id="target-y" class="demo-target target-b">Target B (Y)</div>
+
+					<!-- Точки управления -->
+					<div class="controls-bar">
+						<button type="button" id="btn-align-split" class="btn-preset">X по Target A, Y по Target B</button>
+						<button type="button" id="btn-align-single" class="btn-preset">Только Target A (оба ози)</button>
+					</div>
+				</div>
+			</div>
+			<div class="demo-card">
+				<h2>Модальные окна</h2>
+				<div class="demo-grid cls74-control" id="demo-grid">
+					<div class="form-group">
+						<label>Дата и время:</label>
+						<div class="control-group">
+							<input type="text" class="form-control">
+							<button type="button" class="speed-button"><span class="icon csl74-icon-datetime"></span></button>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Дата:</label>
+						<div class="control-group">
+							<input type="text" class="form-control">
+							<button type="button" class="speed-button"><span class="icon csl74-icon-date"></span></button>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Время:</label>
+						<div class="control-group">
+							<input type="text" class="form-control">
+							<button type="button" class="speed-button"><span class="icon csl74-icon-time"></span></button>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>&nbsp;</label>
+						<div class="button-group">
+							<button type="button" id="demo-modal" class="form-control">Модальное окно</button>
+							<button type="button" id="demo-menu" class="form-control">Меню</button>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Нативный <code>&lt;select&gt;</code></label>
+						<select id="demo-select-1" class="form-control">
+							<option>Первый</option>
+							<option>Второй</option>
+							<option>Третий</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Динамический <code>&lt;select&gt;</code></label>
+						<select id="demo-select-2" class="form-control">
+							<option>Ku</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="demo-card">
+				<h2>Шаблонизация TwigPage</h2>
+				<div>
+					<p>Страница демонстрирует трехслойную архитектуру шаблонизации TwigPage:</p>
+					<ul>
+						<li><code>template.base.twig</code> — базовый HTML-каркас, управление мета-тегами, версионирование ресурсов через <code>headLinkFile</code>, инициализация клиентского JS-окружения и словарей локализации.</li>
+						<li><code>template.plain.twig</code> — стандартная разметка страницы: шапка с навигацией (<code>inset('navigate')</code>, <code>inset('select_lang')</code>), заголовок, описание из локализации и подвал.</li>
+						<li><code>ui_templates.twig</code> — конечный шаблон конкретной страницы, определяющий содержимое блока <code>content</code>.</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
 {% endblock %}

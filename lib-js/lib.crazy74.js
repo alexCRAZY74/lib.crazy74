@@ -521,6 +521,27 @@
 						.replace(/"/g, "&quot;")
 						.replace(/'/g, "&#039;");
 	};
+	StringManager.prototype.strcut = function (text, maxlen) {
+    if (typeof text !== 'string' || !text) return text;
+    
+    maxlen = maxlen || 50;
+    if (text.length <= maxlen) return text;
+
+    var separator = '… ⋯ …';
+    var sepLength = separator.length;
+    
+    if (maxlen <= sepLength) {
+        return text.substring(0, maxlen);
+    }
+
+    var leftLength = Math.ceil((maxlen - sepLength) * 0.65);
+    var rightLength = maxlen - sepLength - leftLength;
+
+    var left = text.substring(0, leftLength);
+    var right = rightLength > 0 ? text.slice(-rightLength) : '';
+
+    return left + separator + right;
+};
 
 	const UUID_Manager = function () {
 		const build_v4 = () => {

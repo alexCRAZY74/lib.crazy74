@@ -1,0 +1,91 @@
+@charset "utf-8"; /* стили csl74-menu */
+
+/* Базовые переменные палитры NetBeans с фолбеками */
+$uiColorBg:             #f0f0f0 !default;
+$uiColorFg:             #000000 !default;
+$uiPanel:               #f0f0f0 !default;
+$uiBorder:              #cccccc !default;
+$uiActive:              #b8d1f3 !default; /* Цвет выделения / ховера */
+
+$syntaxKeyword:         #0000e6 !default; /* Для акцентных / danger элементов */
+$syntaxComment:         #808080 !default; /* Для disabled / subtext */
+
+$uiFontSize:            12px !default;
+
+$normalSpaceHorizontal: 0.8rem !default;
+$normalSpaceVertical:   0.4rem !default;
+$normalPadding:         $normalSpaceVertical $normalSpaceHorizontal !default;
+$uiBorderRadius:        3px !default;
+$uiControlShadow:       0 8px 24px rgba(0, 0, 0, 0.2) !default;
+
+.csl74-menu-container {
+	position: absolute;
+	z-index: 9999;
+	background: $uiPanel;
+	color: $uiColorFg;
+	border: 1px solid $uiBorder;
+	border-radius: $uiBorderRadius;
+	box-shadow: $uiControlShadow;
+	font-size: $uiFontSize;
+	padding: 0;
+
+	.csl74-menu-list {
+		list-style: none;
+		margin: $normalSpaceVertical 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.csl74-menu-item {
+		display: flex;
+		align-items: center;
+		padding: $normalSpaceVertical $normalSpaceHorizontal;
+		cursor: pointer;
+		user-select: none;
+		white-space: nowrap;
+		color: $uiColorFg;
+
+		&:hover {
+			background-color: $uiActive;
+		}
+
+		&.danger {
+			color: $syntaxKeyword;
+
+			.csl74-menu-icon {
+				background-color: $syntaxKeyword;
+			}
+		}
+
+		&.disabled {
+			color: $syntaxComment;
+			cursor: default;
+			pointer-events: none;
+			opacity: 0.6;
+
+			.csl74-menu-icon {
+				background-color: $syntaxComment;
+			}
+		}
+
+		.csl74-menu-label {
+			flex: 1 1 auto;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.csl74-menu-subtext {
+			color: $syntaxComment;
+			margin-left: $normalSpaceHorizontal;
+		}
+	}
+
+	.csl74-menu-divider {
+		height: 1px;
+		background: $uiBorder;
+		margin: $normalSpaceVertical 0;
+		padding: 0;
+		pointer-events: none;
+	}
+}
