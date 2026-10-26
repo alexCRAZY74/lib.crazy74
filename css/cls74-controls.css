@@ -4,7 +4,7 @@
 /* Цвет выделения / ховера */
 /* Для акцентных / danger элементов */
 /* Для disabled / subtext */
-.cls74-control .control-group .speed-button .icon, .csl74-select .icon {
+.cls74-control .control-group .speed-button .icon, .csl74-tabs .csl74-tabs-nav .csl74-tabs-item .icon, .csl74-select .icon {
   width: 1em;
   height: 1em;
   display: inline-block;
@@ -47,6 +47,51 @@
       border-left: none; }
   .cls74-control .control-group .form-control {
     flex: 1 1 auto; }
+.cls74-control .csl74-select .csl74-select-value {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem; }
+  .cls74-control .csl74-select .csl74-select-value .text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis; }
+
+.csl74-tabs {
+  display: flex;
+  flex-direction: column; }
+  .csl74-tabs .csl74-tabs-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 2px;
+    border-bottom: 1px solid #cccccc;
+    user-select: none; }
+    .csl74-tabs .csl74-tabs-nav .csl74-tabs-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      margin-bottom: -1px;
+      background: transparent;
+      color: inherit;
+      font-size: 12px; }
+      .csl74-tabs .csl74-tabs-nav .csl74-tabs-item:hover {
+        background-color: rgba(0, 0, 0, 0.05); }
+      .csl74-tabs .csl74-tabs-nav .csl74-tabs-item.is-active, .csl74-tabs .csl74-tabs-nav .csl74-tabs-item.active {
+        background-color: #f0f0f0;
+        border-color: #cccccc;
+        border-bottom-color: #f0f0f0; }
+  .csl74-tabs .csl74-tabs-panels {
+    flex: 1 1 auto; }
+    .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel {
+      display: none; }
+      .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel.is-active, .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel.active {
+        display: block; }
 
 /* Шеврон / Стрелка вниз */
 .csl74-icon-chevron-down {
@@ -56,6 +101,7 @@
 .csl74-select {
   display: inline-flex;
   flex-direction: row;
+  gap: 0.5em;
   align-items: center;
   cursor: pointer; }
   .csl74-select > select {

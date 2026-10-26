@@ -85,4 +85,24 @@ crazy74.onPageReady(function () {
     }
 	});
 	
+	$('.csl74-tabs').last().csl74Tabs().addTab('Новая').text('Контент динамической вкладки');
+	
+	// 1. Дата и время
+	$('#datetime-select').csl74DatePicker({
+			pickDate: true,
+			pickTime: true
+	});
+
+	// 2. Только дата
+	$('#date-select').csl74DatePicker({
+			pickDate: true,
+			pickTime: false
+	});
+
+	// 3. Только время
+	$('#time-select').csl74DatePicker({
+			pickDate: false,
+			pickTime: true
+	});
+	
 });

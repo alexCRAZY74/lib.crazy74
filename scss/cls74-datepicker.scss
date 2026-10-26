@@ -1,0 +1,229 @@
+@charset "utf-8"; /* стили cls74-datepicker */
+
+/* Базовые переменные палитры NetBeans с фолбеками */
+$uiColorBg:             #f0f0f0 !default;
+$uiColorFg:             #000000 !default;
+$uiColorOnAccent:       #ffffff !default; /* Текст на акцентном фоне */
+$uiPanel:               #f0f0f0 !default;
+$uiBorder:              #cccccc !default;
+$uiActive:              #b8d1f3 !default; /* Цвет выделения / ховера */
+
+$syntaxKeyword:         #0000e6 !default; /* Для акцентных / danger элементов */
+$syntaxComment:         #808080 !default; /* Для disabled / subtext */
+
+$uiFontSize:            12px !default;
+
+$normalSpaceHorizontal: 0.8rem !default;
+$normalSpaceVertical:   0.4rem !default;
+$normalPadding:         $normalSpaceVertical $normalSpaceHorizontal !default;
+$uiBorderRadius:        3px !default;
+$uiControlShadow:       0 8px 24px rgba(0, 0, 0, 0.2) !default;
+
+
+/* Переменные datepicker: рамки */
+$datepicker_Border: 1px solid $uiBorder !default;
+$datepicker_BorderSoft: 1px solid rgba($uiBorder, 0.6) !default;
+
+/* Переменные datepicker: отступы */
+$datepicker_Spacesize: 0.1rem !default;
+$datepicker_Padding: $datepicker_Spacesize !default;
+$datepicker_PaddingText: $datepicker_Spacesize $datepicker_Spacesize * 1.1 !default;
+$datepicker_SpaceXXS: 2px !default;
+$datepicker_SpaceXS: 3px !default;
+$datepicker_SpaceS: 4px !default;
+$datepicker_SpaceM: 6px !default;
+$datepicker_SpaceL: 8px !default;
+
+/* Переменные datepicker: размеры */
+$datepicker_ZIndex: 1050 !default;
+$datepicker_MinWidth: 230px !default;
+$datepicker_TimeValMinWidth: 22px !default;
+$datepicker_BlockColumns: 3 !default;
+
+/* Переменные datepicker: шрифты */
+$datepicker_FontSize: $uiFontSize !default;
+$datepicker_SmallFontSize: $datepicker_FontSize * 0.9 !default;
+$datepicker_FontSizeHead: $datepicker_SmallFontSize !default;
+$datepicker_FontSizeAction: $datepicker_SmallFontSize !default;
+$datepicker_FontSizeTime: $datepicker_SmallFontSize !default;
+
+/* Переменные datepicker: прочее */
+$datepicker_MutedOpacity: 0.5 !default;
+
+.csl74-datepicker, .cls74-datepicker {
+	position: absolute;
+	z-index: $datepicker_ZIndex;
+	background-color: $uiPanel;
+	color: $uiColorFg;
+	border: $datepicker_Border;
+	border-radius: $uiBorderRadius;
+	box-shadow: $uiControlShadow;
+	font-size: $datepicker_FontSize;
+	user-select: none;
+	padding: $normalPadding;
+	min-width: $datepicker_MinWidth;
+	display: flex;
+	flex-direction: column;
+	gap: $datepicker_Spacesize;
+
+	.csl74-datepicker-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: $datepicker_Spacesize;
+		padding-bottom: $datepicker_Spacesize;
+		border-bottom: $datepicker_Border;
+
+		.csl74-datepicker-title {
+			font-weight: bold;
+			cursor: pointer;
+			padding: $datepicker_PaddingText;
+			border-radius: $uiBorderRadius;
+			flex-grow: 1;
+			text-align: center;
+
+			&:hover {
+				background-color: $uiActive;
+			}
+		}
+	}
+
+	.csl74-datepicker-btn {
+		font-size: 1em;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		color: inherit;
+		padding: $datepicker_Spacesize;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: $uiBorderRadius;
+
+		&:hover {
+			background-color: $uiActive;
+		}
+	}
+
+	.csl74-datepicker-grid {
+		font-size: 1rem;
+		width: 100%;
+		border-collapse: collapse;
+
+		th {
+			font-size: 1rem;
+			font-weight: normal;
+			color: $syntaxComment;
+			font-size: $datepicker_FontSizeHead;
+			text-align: center;
+			padding: $datepicker_PaddingText;
+		}
+
+		.csl74-datepicker-cell {
+			font-size: 1rem;
+			text-align: center;
+			padding: $datepicker_PaddingText;
+			cursor: pointer;
+			border-radius: $uiBorderRadius;
+
+			&:hover {
+				background-color: $uiActive;
+			}
+
+			&.is-muted {
+				color: $syntaxComment;
+				opacity: $datepicker_MutedOpacity;
+			}
+
+			&.is-today {
+				font-weight: bold;
+				text-decoration: underline;
+			}
+
+			&.is-selected {
+				background-color: $syntaxKeyword;
+				color: $uiColorOnAccent;
+			}
+		}
+	}
+
+	.csl74-datepicker-block-grid {
+		font-size: 1rem;
+		display: grid;
+		grid-template-columns: repeat($datepicker_BlockColumns, 1fr);
+		gap: $datepicker_Spacesize;
+		padding: $datepicker_SpaceS 0;
+
+		.csl74-datepicker-block-cell {
+			text-align: center;
+			padding: $datepicker_PaddingText;
+			cursor: pointer;
+			border-radius: $uiBorderRadius;
+
+			&:hover {
+				background-color: $uiActive;
+			}
+
+			&.is-muted {
+				color: $syntaxComment;
+				opacity: $datepicker_MutedOpacity;
+			}
+
+			&.is-selected {
+				background-color: $syntaxKeyword;
+				color: $uiColorOnAccent;
+			}
+		}
+	}
+
+	.csl74-datepicker-time {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: $datepicker_Spacesize;
+		padding: $datepicker_Padding;
+		border-top: $datepicker_BorderSoft;
+
+		.csl74-datepicker-time-unit {
+			font-size: 1rem;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+
+			.csl74-datepicker-time-val {
+				font-size: 1rem;
+				font-size: $datepicker_FontSize;
+				font-weight: bold;
+				padding: $datepicker_PaddingText;
+				min-width: $datepicker_TimeValMinWidth;
+				text-align: center;
+			}
+		}
+
+		.csl74-datepicker-time-sep {
+			font-weight: bold;
+			color: $syntaxComment;
+		}
+	}
+
+	.csl74-datepicker-footer {
+		display: flex;
+		justify-content: center;
+		padding-top: $datepicker_Spacesize;
+		border-top: $datepicker_BorderSoft;
+
+		.csl74-datepicker-today-btn {
+			background: transparent;
+			border: none;
+			cursor: pointer;
+			color: $syntaxKeyword;
+			font-size: $datepicker_FontSize;
+			padding: $datepicker_PaddingText;
+			border-radius: $uiBorderRadius;
+
+			&:hover {
+				background-color: $uiActive;
+			}
+		}
+	}
+}

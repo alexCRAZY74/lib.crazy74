@@ -27,21 +27,21 @@
 				<div class="demo-grid cls74-control" id="demo-grid">
 					<div class="form-group">
 						<label>Дата и время:</label>
-						<div class="control-group">
+						<div class="control-group" id="datetime-select">
 							<input type="text" class="form-control">
 							<button type="button" class="speed-button"><span class="icon csl74-icon-datetime"></span></button>
 						</div>
 					</div>
 					<div class="form-group">
 						<label>Дата:</label>
-						<div class="control-group">
+						<div class="control-group" id="date-select">
 							<input type="text" class="form-control">
 							<button type="button" class="speed-button"><span class="icon csl74-icon-date"></span></button>
 						</div>
 					</div>
 					<div class="form-group">
 						<label>Время:</label>
-						<div class="control-group">
+						<div class="control-group" id="time-select">
 							<input type="text" class="form-control">
 							<button type="button" class="speed-button"><span class="icon csl74-icon-time"></span></button>
 						</div>
@@ -65,8 +65,17 @@
 						<label>Динамический <code>&lt;select&gt;</code></label>
 						<select id="demo-select-2" class="form-control">
 							<option>Ku</option>
+							<option selected>2</option>
 						</select>
 					</div>
+				</div>
+			</div>
+			<div class="csl74-tabs">
+				<div data-title="Основное" data-icon="csl74-icon-file">
+					Контент первой вкладки (Twig/HTML)
+				</div>
+				<div data-title="История" data-icon="csl74-icon-time">
+					Контент второй вкладки
 				</div>
 			</div>
 			<div class="demo-card">

@@ -78,6 +78,76 @@ $uiControlShadow:       0 8px 24px rgba(0, 0, 0, 0.2) !default;
 			}
 		}
 	}
+	.csl74-select {
+		.csl74-select-value {
+			display: flex;
+			align-items: center;
+			gap: $normalSpaceHorizontal / 2;
+			.text {
+				flex: 1 1 auto;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+	}
+}
+
+.csl74-tabs {
+	display: flex;
+	flex-direction: column;
+
+	.csl74-tabs-nav {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-end;
+		gap: 2px;
+		border-bottom: 1px solid $uiBorder;
+		user-select: none;
+
+		.csl74-tabs-item {
+			display: inline-flex;
+			align-items: center;
+			gap: $normalSpaceHorizontal / 2;
+			padding: $normalPadding;
+			cursor: pointer;
+			border: 1px solid transparent;
+			border-bottom: none;
+			border-top-left-radius: $uiBorderRadius;
+			border-top-right-radius: $uiBorderRadius;
+			margin-bottom: -1px;
+			background: transparent;
+			color: inherit;
+			font-size: $uiFontSize;
+
+			.icon {
+				@extend %icon-base;
+			}
+
+			&:hover {
+				background-color: rgba(0, 0, 0, 0.05);
+			}
+
+			&.is-active,
+			&.active {
+				background-color: $uiColorBg;
+				border-color: $uiBorder;
+				border-bottom-color: $uiColorBg;
+			}
+		}
+	}
+
+	.csl74-tabs-panels {
+		flex: 1 1 auto;
+
+		.csl74-tabs-panel {
+			display: none;
+
+			&.is-active,
+			&.active {
+				display: block;
+			}
+		}
+	}
 }
 /* Шеврон / Стрелка вниз */
 .csl74-icon-chevron-down {
@@ -87,6 +157,7 @@ $uiControlShadow:       0 8px 24px rgba(0, 0, 0, 0.2) !default;
 .csl74-select {
 	display: inline-flex;
 	flex-direction: row;
+	gap: 0.5em;
 	align-items: center;
 	cursor: pointer;
 	& > select {

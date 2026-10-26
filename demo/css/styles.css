@@ -187,6 +187,7 @@ footer {
     align-items: center;
     padding: 0.4em 0.8em;
     cursor: pointer;
+    gap: 0.4em;
     user-select: none;
     white-space: nowrap;
     color: #000000; }
@@ -222,7 +223,7 @@ footer {
 /* Цвет выделения / ховера */
 /* Для акцентных / danger элементов */
 /* Для disabled / subtext */
-.cls74-control .control-group .speed-button .icon, .csl74-select .icon {
+.cls74-control .control-group .speed-button .icon, .csl74-tabs .csl74-tabs-nav .csl74-tabs-item .icon, .csl74-select .icon {
   width: 1em;
   height: 1em;
   display: inline-block;
@@ -265,6 +266,51 @@ footer {
       border-left: none; }
   .cls74-control .control-group .form-control {
     flex: 1 1 auto; }
+.cls74-control .csl74-select .csl74-select-value {
+  display: flex;
+  align-items: center;
+  gap: 0.4em; }
+  .cls74-control .csl74-select .csl74-select-value .text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis; }
+
+.csl74-tabs {
+  display: flex;
+  flex-direction: column; }
+  .csl74-tabs .csl74-tabs-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 2px;
+    border-bottom: 1px solid #cccccc;
+    user-select: none; }
+    .csl74-tabs .csl74-tabs-nav .csl74-tabs-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      padding: 0.4em 0.8em;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      margin-bottom: -1px;
+      background: transparent;
+      color: inherit;
+      font-size: 0.9em; }
+      .csl74-tabs .csl74-tabs-nav .csl74-tabs-item:hover {
+        background-color: rgba(0, 0, 0, 0.05); }
+      .csl74-tabs .csl74-tabs-nav .csl74-tabs-item.is-active, .csl74-tabs .csl74-tabs-nav .csl74-tabs-item.active {
+        background-color: #f0f0f0;
+        border-color: #cccccc;
+        border-bottom-color: #f0f0f0; }
+  .csl74-tabs .csl74-tabs-panels {
+    flex: 1 1 auto; }
+    .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel {
+      display: none; }
+      .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel.is-active, .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel.active {
+        display: block; }
 
 /* Шеврон / Стрелка вниз */
 .csl74-icon-chevron-down {
@@ -274,6 +320,7 @@ footer {
 .csl74-select {
   display: inline-flex;
   flex-direction: row;
+  gap: 0.5em;
   align-items: center;
   cursor: pointer; }
   .csl74-select > select {
@@ -286,13 +333,152 @@ footer {
   .csl74-select.is-open .csl74-icon-chevron-down {
     transform: rotate(180deg); }
 
+/* стили cls74-datepicker */
+/* Базовые переменные палитры NetBeans с фолбеками */
+/* Текст на акцентном фоне */
+/* Цвет выделения / ховера */
+/* Для акцентных / danger элементов */
+/* Для disabled / subtext */
+/* Переменные datepicker: рамки */
+/* Переменные datepicker: отступы */
+/* Переменные datepicker: размеры */
+/* Переменные datepicker: шрифты */
+/* Переменные datepicker: прочее */
+.csl74-datepicker, .cls74-datepicker {
+  position: absolute;
+  z-index: 1050;
+  background-color: #f0f0f0;
+  color: #000000;
+  border: 1px solid #cccccc;
+  border-radius: 3px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-size: 0.9em;
+  user-select: none;
+  padding: 0.4em 0.8em;
+  min-width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem; }
+  .csl74-datepicker .csl74-datepicker-header, .cls74-datepicker .csl74-datepicker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.1rem;
+    padding-bottom: 0.1rem;
+    border-bottom: 1px solid #cccccc; }
+    .csl74-datepicker .csl74-datepicker-header .csl74-datepicker-title, .cls74-datepicker .csl74-datepicker-header .csl74-datepicker-title {
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0.1rem 0.11rem;
+      border-radius: 3px;
+      flex-grow: 1;
+      text-align: center; }
+      .csl74-datepicker .csl74-datepicker-header .csl74-datepicker-title:hover, .cls74-datepicker .csl74-datepicker-header .csl74-datepicker-title:hover {
+        background-color: #b8d1f3; }
+  .csl74-datepicker .csl74-datepicker-btn, .cls74-datepicker .csl74-datepicker-btn {
+    font-size: 1em;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    padding: 0.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px; }
+    .csl74-datepicker .csl74-datepicker-btn:hover, .cls74-datepicker .csl74-datepicker-btn:hover {
+      background-color: #b8d1f3; }
+  .csl74-datepicker .csl74-datepicker-grid, .cls74-datepicker .csl74-datepicker-grid {
+    font-size: 1rem;
+    width: 100%;
+    border-collapse: collapse; }
+    .csl74-datepicker .csl74-datepicker-grid th, .cls74-datepicker .csl74-datepicker-grid th {
+      font-size: 1rem;
+      font-weight: normal;
+      color: #808080;
+      font-size: 0.81em;
+      text-align: center;
+      padding: 0.1rem 0.11rem; }
+    .csl74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell, .cls74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell {
+      font-size: 1rem;
+      text-align: center;
+      padding: 0.1rem 0.11rem;
+      cursor: pointer;
+      border-radius: 3px; }
+      .csl74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell:hover, .cls74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell:hover {
+        background-color: #b8d1f3; }
+      .csl74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell.is-muted, .cls74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell.is-muted {
+        color: #808080;
+        opacity: 0.5; }
+      .csl74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell.is-today, .cls74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell.is-today {
+        font-weight: bold;
+        text-decoration: underline; }
+      .csl74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell.is-selected, .cls74-datepicker .csl74-datepicker-grid .csl74-datepicker-cell.is-selected {
+        background-color: #0000e6;
+        color: #ffffff; }
+  .csl74-datepicker .csl74-datepicker-block-grid, .cls74-datepicker .csl74-datepicker-block-grid {
+    font-size: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.1rem;
+    padding: 4px 0; }
+    .csl74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell, .cls74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell {
+      text-align: center;
+      padding: 0.1rem 0.11rem;
+      cursor: pointer;
+      border-radius: 3px; }
+      .csl74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell:hover, .cls74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell:hover {
+        background-color: #b8d1f3; }
+      .csl74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell.is-muted, .cls74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell.is-muted {
+        color: #808080;
+        opacity: 0.5; }
+      .csl74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell.is-selected, .cls74-datepicker .csl74-datepicker-block-grid .csl74-datepicker-block-cell.is-selected {
+        background-color: #0000e6;
+        color: #ffffff; }
+  .csl74-datepicker .csl74-datepicker-time, .cls74-datepicker .csl74-datepicker-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.1rem;
+    border-top: 1px solid rgba(204, 204, 204, 0.6); }
+    .csl74-datepicker .csl74-datepicker-time .csl74-datepicker-time-unit, .cls74-datepicker .csl74-datepicker-time .csl74-datepicker-time-unit {
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center; }
+      .csl74-datepicker .csl74-datepicker-time .csl74-datepicker-time-unit .csl74-datepicker-time-val, .cls74-datepicker .csl74-datepicker-time .csl74-datepicker-time-unit .csl74-datepicker-time-val {
+        font-size: 1rem;
+        font-size: 0.9em;
+        font-weight: bold;
+        padding: 0.1rem 0.11rem;
+        min-width: 22px;
+        text-align: center; }
+    .csl74-datepicker .csl74-datepicker-time .csl74-datepicker-time-sep, .cls74-datepicker .csl74-datepicker-time .csl74-datepicker-time-sep {
+      font-weight: bold;
+      color: #808080; }
+  .csl74-datepicker .csl74-datepicker-footer, .cls74-datepicker .csl74-datepicker-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.1rem;
+    border-top: 1px solid rgba(204, 204, 204, 0.6); }
+    .csl74-datepicker .csl74-datepicker-footer .csl74-datepicker-today-btn, .cls74-datepicker .csl74-datepicker-footer .csl74-datepicker-today-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #0000e6;
+      font-size: 0.9em;
+      padding: 0.1rem 0.11rem;
+      border-radius: 3px; }
+      .csl74-datepicker .csl74-datepicker-footer .csl74-datepicker-today-btn:hover, .cls74-datepicker .csl74-datepicker-footer .csl74-datepicker-today-btn:hover {
+        background-color: #b8d1f3; }
+
 /* Базовый класс для иконок меню */
 .csl74-menu-icon {
   display: inline-block;
   width: 16px;
   height: 16px;
   vertical-align: middle;
-  margin-right: 8px;
   background-color: currentColor;
   mask-repeat: no-repeat;
   mask-position: center;

@@ -372,13 +372,19 @@
 			});
 		}
 
+		// Перепозиционирование окна
+		const realign = () => {
+			if (opt.position && typeof $.fn.csl74Position === 'function') {
+				$frame.csl74Position(...opt.position);
+			}
+		};
+
 		// Показываем окно
 		if ($backdrop) $backdrop.fadeIn(opt.duration);
 		if (opt.position && typeof $.fn.csl74Position === 'function') {
-			$frame.show().csl74Position(...opt.position);
-			setTimeout(() => {
-				$frame.csl74Position(...opt.position);
-			}, 50);
+			$frame.show();
+			realign();
+			setTimeout(realign, 50);
 		} else {
 			$frame.addClass('csl-window-centered').fadeIn(opt.duration);
 		}
@@ -388,6 +394,7 @@
 			$frame: $frame,
 			$content: $content,
 			close: close,
+			realign: realign,
 			setTitle: function (newTitle) {
 				$header.children('.' + getClassName('title')).text(newTitle);
 			},
@@ -459,6 +466,7 @@
 				}
 				if (item.disabled) $res.addClass('disabled');
 				if (item.danger) $res.addClass('danger');
+				if (item.selected || item.active) $res.addClass('selected');
 				return $res;
 			}.bind(that);
 
@@ -623,40 +631,100 @@
 
 			// 2. Если items переданы явно — синхронизируем их с нативным <select>
 			if (opts.items && Array.isArray(opts.items)) {
+				var currentVal = $select.val();
 				$select.empty();
 				opts.items.forEach(function (item) {
 					if (typeof item === 'string' && item === '-') return;
-					$('<option>', {
-						value: item.value !== undefined ? item.value : item.id,
+					var val = item.value !== undefined ? item.value : item.id;
+					var isSelected = item.selected || (currentVal !== null && currentVal !== undefined && String(val) === String(currentVal));
+					var $option = $('<option>', {
+						value: val,
 						text: item.label !== undefined ? item.label : item.title,
 						disabled: !!item.disabled,
-						selected: !!item.selected
-					}).appendTo($select);
+						selected: !!isSelected
+					});
+					if (item.icon) {
+						$option.data('icon', item.icon);
+					}
+					$option.appendTo($select);
 				});
 			}
 
 			// Обновление отображаемого значения
-			function syncValue() {
+			function syncValue1() {
 				var $opt = $select.find('option:selected');
 				var txt = $opt.length ? $opt.text() : opts.placeholder;
-				$value.text(txt);
+
+				$value.empty(); // Очищаем предыдущее содержимое
+				if ($opt.length) {
+					var iconClass = $opt.data('icon');
+					if (iconClass) {
+						$('<span>', { class: 'icon ' + iconClass }).appendTo($value);
+					}
+					$value.append(txt);
+				} else {
+					$value.text(opts.placeholder);
+				}
 			}
+      
+      function syncValue() {
+        var $opt = $select.find('option:selected');
+        var txt = $opt.length ? $opt.text() : opts.placeholder;
+
+        $value.empty(); // Очищаем предыдущее содержимое
+        if ($opt.length) {
+          var iconClass = $opt.data('icon');
+          if (iconClass) {
+            $('<span>', {class: 'icon ' + iconClass}).appendTo($value);
+            $('<span>', {class: 'text'}).text(txt).appendTo($value);
+          } else {
+            $value.append(txt);
+          }
+        } else {
+          $value.text(opts.placeholder);
+        }
+      }
 
 			$select.off('change.csl74Select').on('change.csl74Select', syncValue);
 			syncValue();
 
 			// 3. Собираем единый options для csl74Menu
 			var menuOpts = $.extend({}, options, {
-				// Если items не передали, вытягиваем их из option нативного select
-				items: opts.items || function () {
+				items: function () {
+					var currentVal = String($select.val());
+
+					var markSelected = function (list) {
+						return list.map(function (item) {
+							if (typeof item === 'string') {
+								if (item === '-') return item;
+								item = { value: item, label: item };
+							}
+							var val = item.value !== undefined ? item.value : item.id;
+							return $.extend({}, item, {
+								selected: item.selected !== undefined ? item.selected : (String(val) === currentVal)
+							});
+						});
+					};
+
+					if (opts.items) {
+						var raw = typeof opts.items === 'function' ? opts.items($select) : opts.items;
+						if (raw && typeof raw.then === 'function') {
+							return raw.then(markSelected);
+						}
+						return Array.isArray(raw) ? markSelected(raw) : raw;
+					}
+
 					var res = [];
 					$select.find('option').each(function () {
 						var $o = $(this);
+						var val = $o.val();
 						res.push({
-							value: $o.val(),
-							label: $o.text(),
-							disabled: $o.is(':disabled')
-						});
+              value: val,
+              label: $o.text(),
+              disabled: $o.is(':disabled'),
+              selected: $o.is(':selected'),
+              icon: $o.data('icon') // Передаем иконку, если есть
+            });
 					});
 					return res;
 				},
@@ -691,3 +759,598 @@
 		});
 	};
 })(jQuery);
+
+(function ($) {
+	'use strict';
+
+	const TabControl = function ($element, options) {
+		this.$element = $element;
+		this.options = $.extend({
+			active: 0,
+			onSelect: null
+		}, options);
+
+		this.tabs = [];
+		this._init();
+	};
+
+	TabControl.prototype._init = function () {
+		var self = this;
+		this.$element.addClass('csl74-tabs');
+
+		this.$nav = this.$element.children('.csl74-tabs-nav');
+		if (!this.$nav.length) {
+			this.$nav = $('<div>', { class: 'csl74-tabs-nav' }).prependTo(this.$element);
+		}
+
+		this.$panels = this.$element.children('.csl74-tabs-panels');
+		var $initial = this.$element.children().not(this.$nav).not(this.$panels);
+		if (!this.$panels.length) {
+			this.$panels = $('<div>', { class: 'csl74-tabs-panels' }).appendTo(this.$element);
+		}
+
+		var activeIndex = -1;
+		if ($initial.length) {
+			$initial.each(function (i) {
+				var $panel = $(this);
+				$panel.appendTo(self.$panels);
+				var title = $panel.data('title') || $panel.attr('title') || '';
+				var icon = $panel.data('icon') || '';
+				if ($panel.hasClass('active') || $panel.hasClass('is-active') || $panel.data('active')) {
+					activeIndex = i;
+				}
+				self._createTab(title, icon, $panel);
+			});
+		}
+
+		if (this.tabs.length > 0) {
+			this.selectTab(activeIndex >= 0 ? activeIndex : (this.options.active || 0));
+		}
+	};
+
+	TabControl.prototype._createTab = function (title, icon, $panel) {
+		var self = this;
+		$panel.addClass('csl74-tabs-panel');
+
+		var $navItem = $('<div>', { class: 'csl74-tabs-item' });
+		if (icon) {
+			$('<span>', { class: 'icon ' + icon }).appendTo($navItem);
+		}
+		$('<span>', { class: 'csl74-tabs-title', text: title || ('Вкладка ' + (this.tabs.length + 1)) }).appendTo($navItem);
+
+		var tabData = {
+			title: title,
+			icon: icon,
+			$navItem: $navItem,
+			$panel: $panel
+		};
+
+		$panel.data('csl74Tab', tabData);
+		$panel.data('csl74Tabs', this);
+
+		$navItem.on('click', function () {
+			self.selectTab(tabData);
+		});
+
+		$navItem.appendTo(this.$nav);
+		this.tabs.push(tabData);
+
+		return tabData;
+	};
+
+	TabControl.prototype.addTab = function (title, icon, activate) {
+		var $panel = $('<div>', { class: 'csl74-tabs-panel' }).appendTo(this.$panels);
+		var tabData = this._createTab(title, icon, $panel);
+
+		if (activate === true || this.tabs.length === 1) {
+			this.selectTab(tabData);
+		}
+
+		return $panel;
+	};
+
+	TabControl.prototype.selectTab = function (target) {
+		var tabToSelect = null;
+		if (typeof target === 'number') {
+			tabToSelect = this.tabs[target] || null;
+		} else if (target && target.$panel) {
+			tabToSelect = target;
+		} else if (target && target.jquery) {
+			for (var i = 0; i < this.tabs.length; i++) {
+				if (this.tabs[i].$panel[0] === target[0] || this.tabs[i].$navItem[0] === target[0]) {
+					tabToSelect = this.tabs[i];
+					break;
+				}
+			}
+		}
+
+		if (!tabToSelect) return this;
+
+		var selectedIndex = this.tabs.indexOf(tabToSelect);
+		this.tabs.forEach(function (t) {
+			var isActive = (t === tabToSelect);
+			t.$navItem.toggleClass('is-active active', isActive);
+			t.$panel.toggleClass('is-active active', isActive);
+		});
+
+		if (typeof this.options.onSelect === 'function') {
+			this.options.onSelect.call(this, selectedIndex, tabToSelect);
+		}
+
+		return this;
+	};
+
+	TabControl.prototype.getActiveTab = function () {
+		for (var i = 0; i < this.tabs.length; i++) {
+			if (this.tabs[i].$navItem.hasClass('is-active')) {
+				return this.tabs[i];
+			}
+		}
+		return null;
+	};
+
+	TabControl.prototype.getTab = function (index) {
+		return this.tabs[index] || null;
+	};
+
+	$.fn.csl74Tabs = function (options) {
+		var firstInstance = null;
+
+		this.each(function () {
+			var $el = $(this);
+			var instance = $el.data('csl74Tabs');
+			if (!instance) {
+				instance = new TabControl($el, options);
+				$el.data('csl74Tabs', instance);
+			}
+			if (!firstInstance) {
+				firstInstance = instance;
+			}
+		});
+
+		return firstInstance;
+	};
+
+})(jQuery);
+
+(function (window, $, crazy74) {
+	'use strict';
+
+	if (!$) return;
+
+	var ACTIVE_PICKER = null;
+	var ACTIVE_INPUT = null;
+
+	var SVG_ICONS = {
+		prev: '<svg viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M10.5 3.5L5.5 8l5 4.5-.7.8L4 8l5.8-5.3z"/></svg>',
+		next: '<svg viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M5.5 3.5l5 4.5-5 4.5.7.8L12 8 6.2 2.7z"/></svg>',
+		prevYear: '<svg viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M8.5 3.5L3.5 8l5 4.5-.7.8L2 8l5.8-5.3zM14 3.5L9 8l5 4.5-.7.8L7.5 8l5.8-5.3z"/></svg>',
+		nextYear: '<svg viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M2 3.5l5 4.5-5 4.5.7.8L8.5 8 2.7 2.7zM7.5 3.5l5 4.5-5 4.5.7.8L14 8 8.2 2.7z"/></svg>',
+		up: '<svg viewBox="0 0 16 16" width="10" height="10"><path fill="currentColor" d="M3.5 10.5L8 5.5l4.5 5-.8.7L8 7l-3.7 4.2z"/></svg>',
+		down: '<svg viewBox="0 0 16 16" width="10" height="10"><path fill="currentColor" d="M3.5 5.5L8 10.5l4.5-5-.8-.7L8 9 4.3 4.8z"/></svg>'
+	};
+
+	var DEFAULT_MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+	var DEFAULT_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+	function getMonthNames() {
+		if (crazy74 && crazy74.lang) {
+			var list = crazy74.lang.get('date', 'months') || crazy74.lang.get('months');
+			if (Array.isArray(list) && list.length === 12) return list;
+		}
+		return DEFAULT_MONTHS;
+	}
+
+	function getDayNamesShort() {
+		if (crazy74 && crazy74.lang) {
+			var list = crazy74.lang.get('date', 'days_short') || crazy74.lang.get('days_short');
+			if (Array.isArray(list) && list.length === 7) return list;
+		}
+		return DEFAULT_DAYS_SHORT;
+	}
+
+	function pad(num) {
+		return num < 10 ? '0' + num : '' + num;
+	}
+
+	function parseDate(val) {
+		if (!val) return null;
+		if (val instanceof Date && !isNaN(val.getTime())) return new Date(val.getTime());
+		if (crazy74 && crazy74.date && typeof crazy74.date.parseDate === 'function') {
+			var parsed = crazy74.date.parseDate(val);
+			if (parsed instanceof Date && !isNaN(parsed.getTime())) return parsed;
+		}
+		if (typeof val === 'string') {
+			var d = new Date(val);
+			if (!isNaN(d.getTime())) return d;
+			var m = val.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+			if (m) {
+				return new Date(
+					parseInt(m[3], 10),
+					parseInt(m[2], 10) - 1,
+					parseInt(m[1], 10),
+					parseInt(m[4] || 0, 10),
+					parseInt(m[5] || 0, 10),
+					parseInt(m[6] || 0, 10)
+				);
+			}
+		}
+		return null;
+	}
+
+	function formatDate(date, opts) {
+		if (!date) return '';
+		if (opts.format && crazy74 && crazy74.date && typeof crazy74.date.formatLocale === 'function') {
+			return crazy74.date.formatLocale(date, {withTime: opts.pickTime});
+		}
+		var day = pad(date.getDate());
+		var month = pad(date.getMonth() + 1);
+		var year = date.getFullYear();
+		var hours = pad(date.getHours());
+		var minutes = pad(date.getMinutes());
+		var seconds = pad(date.getSeconds());
+
+		if (opts.pickDate && opts.pickTime) {
+			return opts.pickSeconds
+				? day + '.' + month + '.' + year + ' ' + hours + ':' + minutes + ':' + seconds
+				: day + '.' + month + '.' + year + ' ' + hours + ':' + minutes;
+		}
+		if (opts.pickDate) {
+			return day + '.' + month + '.' + year;
+		}
+		if (opts.pickTime) {
+			return opts.pickSeconds ? hours + ':' + minutes + ':' + seconds : hours + ':' + minutes;
+		}
+		return '';
+	}
+
+	function closeActivePicker() {
+		if (ACTIVE_PICKER) {
+			var p = ACTIVE_PICKER;
+			var trig = ACTIVE_INPUT;
+			ACTIVE_PICKER = null;
+			ACTIVE_INPUT = null;
+			$(document).off('click.csl74DatePicker keydown.csl74DatePicker');
+			if (p.opts && typeof p.opts.onClose === 'function') {
+				p.opts.onClose(trig);
+			}
+			p.$el.remove();
+		}
+	}
+
+	function DatePickerWidget($input, options) {
+		this.$input = $input;
+		this.opts = $.extend({
+			pickDate: true,
+			pickTime: true,
+			pickSeconds: false,
+			format: null,
+			minDate: null,
+			maxDate: null,
+			stepMinute: 1,
+			stepSecond: 1,
+			customClass: '',
+			position: [
+				[{ my: 'left top', at: 'left bottom' }],
+				{ collision: 'flipfit' }
+			],
+			onSelect: null,
+			onOpen: null,
+			onClose: null
+		}, options);
+
+		this.viewMode = this.opts.pickDate ? 'days' : 'time';
+		var initial = parseDate($input.val()) || new Date();
+		this.selectedDate = new Date(initial.getTime());
+		this.viewDate = new Date(initial.getFullYear(), initial.getMonth(), 1);
+		this.$el = null;
+	}
+
+	DatePickerWidget.prototype.render = function () {
+		var self = this;
+		var cls = 'csl74-datepicker';
+		if (this.opts.customClass) cls += ' ' + this.opts.customClass;
+
+		if (this.$el) this.$el.empty();
+		else {
+			this.$el = $('<div>', { class: cls });
+			this.$el.on('click.csl74DatePicker', function (e) {
+				e.stopPropagation();
+			});
+			$('body').append(this.$el);
+		}
+
+		if (this.opts.pickDate) {
+			var $dateContainer = $('<div>', { class: 'csl74-datepicker-date-view' }).appendTo(this.$el);
+			if (this.viewMode === 'days') this._renderDays($dateContainer);
+			else if (this.viewMode === 'months') this._renderMonths($dateContainer);
+			else if (this.viewMode === 'years') this._renderYears($dateContainer);
+		}
+
+		if (this.opts.pickTime) {
+			this._renderTime(this.$el);
+		}
+
+		this._renderFooter(this.$el);
+		this._realign();
+	};
+
+	DatePickerWidget.prototype._renderDays = function ($container) {
+		var self = this;
+		var months = getMonthNames();
+		var daysShort = getDayNamesShort();
+
+		var $header = $('<div>', { class: 'csl74-datepicker-header' }).appendTo($container);
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-prev-year', html: SVG_ICONS.prevYear })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setFullYear(self.viewDate.getFullYear() - 1); self.render(); }).appendTo($header);
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-prev-month', html: SVG_ICONS.prev })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setMonth(self.viewDate.getMonth() - 1); self.render(); }).appendTo($header);
+
+		$('<span>', { class: 'csl74-datepicker-title', text: months[self.viewDate.getMonth()] + ' ' + self.viewDate.getFullYear() })
+			.on('click', function (e) { e.stopPropagation(); self.viewMode = 'months'; self.render(); }).appendTo($header);
+
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-next-month', html: SVG_ICONS.next })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setMonth(self.viewDate.getMonth() + 1); self.render(); }).appendTo($header);
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-next-year', html: SVG_ICONS.nextYear })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setFullYear(self.viewDate.getFullYear() + 1); self.render(); }).appendTo($header);
+
+		var $table = $('<table>', { class: 'csl74-datepicker-grid' }).appendTo($container);
+		var $thead = $('<thead>').appendTo($table);
+		var $trHead = $('<tr>').appendTo($thead);
+		daysShort.forEach(function (d) { $('<th>').text(d).appendTo($trHead); });
+
+		var $tbody = $('<tbody>').appendTo($table);
+		var y = self.viewDate.getFullYear();
+		var m = self.viewDate.getMonth();
+		var firstDay = new Date(y, m, 1);
+		var startOffset = (firstDay.getDay() + 6) % 7;
+		var curDate = new Date(y, m, 1 - startOffset);
+		var today = new Date();
+
+		for (var row = 0; row < 6; row++) {
+			var $tr = $('<tr>').appendTo($tbody);
+			for (var col = 0; col < 7; col++) {
+				var cellDate = new Date(curDate.getTime());
+				var $td = $('<td>', { class: 'csl74-datepicker-cell', text: cellDate.getDate() });
+
+				if (cellDate.getMonth() !== m) $td.addClass('is-muted');
+				if (cellDate.toDateString() === today.toDateString()) $td.addClass('is-today');
+				if (self.selectedDate && cellDate.toDateString() === self.selectedDate.toDateString()) $td.addClass('is-selected');
+
+				(function (d) {
+					$td.on('click', function (e) {
+						e.stopPropagation();
+						self.selectedDate.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+						if (!self.opts.pickTime) {
+							self.commit();
+							closeActivePicker();
+						} else {
+							self.commit();
+							self.render();
+						}
+					});
+				})(cellDate);
+
+				$td.appendTo($tr);
+				curDate.setDate(curDate.getDate() + 1);
+			}
+		}
+	};
+
+	DatePickerWidget.prototype._renderMonths = function ($container) {
+		var self = this;
+		var months = getMonthNames();
+		var y = self.viewDate.getFullYear();
+
+		var $header = $('<div>', { class: 'csl74-datepicker-header' }).appendTo($container);
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-prev-year', html: SVG_ICONS.prevYear })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setFullYear(y - 1); self.render(); }).appendTo($header);
+
+		$('<span>', { class: 'csl74-datepicker-title', text: y })
+			.on('click', function (e) { e.stopPropagation(); self.viewMode = 'years'; self.render(); }).appendTo($header);
+
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-next-year', html: SVG_ICONS.nextYear })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setFullYear(y + 1); self.render(); }).appendTo($header);
+
+		var $grid = $('<div>', { class: 'csl74-datepicker-block-grid' }).appendTo($container);
+		months.forEach(function (name, idx) {
+			var $cell = $('<div>', { class: 'csl74-datepicker-block-cell', text: name.substring(0, 3) });
+			if (self.selectedDate && self.selectedDate.getFullYear() === y && self.selectedDate.getMonth() === idx) {
+				$cell.addClass('is-selected');
+			}
+			$cell.on('click', function (e) {
+				e.stopPropagation();
+				self.viewDate.setMonth(idx);
+				self.viewMode = 'days';
+				self.render();
+			}).appendTo($grid);
+		});
+	};
+
+	DatePickerWidget.prototype._renderYears = function ($container) {
+		var self = this;
+		var y = self.viewDate.getFullYear();
+		var startYear = Math.floor(y / 10) * 10;
+		var endYear = startYear + 9;
+
+		var $header = $('<div>', { class: 'csl74-datepicker-header' }).appendTo($container);
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-prev-decade', html: SVG_ICONS.prevYear })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setFullYear(startYear - 10); self.render(); }).appendTo($header);
+
+		$('<span>', { class: 'csl74-datepicker-title', text: startYear + ' – ' + endYear }).appendTo($header);
+
+		$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-next-decade', html: SVG_ICONS.nextYear })
+			.on('click', function (e) { e.stopPropagation(); self.viewDate.setFullYear(startYear + 10); self.render(); }).appendTo($header);
+
+		var $grid = $('<div>', { class: 'csl74-datepicker-block-grid' }).appendTo($container);
+		for (var curr = startYear - 1; curr <= endYear + 1; curr++) {
+			var $cell = $('<div>', { class: 'csl74-datepicker-block-cell', text: curr });
+			if (curr < startYear || curr > endYear) $cell.addClass('is-muted');
+			if (self.selectedDate && self.selectedDate.getFullYear() === curr) $cell.addClass('is-selected');
+
+			(function (chosen) {
+				$cell.on('click', function (e) {
+					e.stopPropagation();
+					self.viewDate.setFullYear(chosen);
+					self.viewMode = 'months';
+					self.render();
+				});
+			})(curr);
+			$cell.appendTo($grid);
+		}
+	};
+
+	DatePickerWidget.prototype._renderTime = function ($container) {
+		var self = this;
+		var $time = $('<div>', { class: 'csl74-datepicker-time' }).appendTo($container);
+
+		function makeSpinner(val, max, onStep) {
+			var $wrap = $('<div>', { class: 'csl74-datepicker-time-unit' });
+			$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-time-up', html: SVG_ICONS.up })
+				.on('click', function (e) { e.stopPropagation(); onStep(1); self.commit(); self.render(); }).appendTo($wrap);
+			$('<span>', { class: 'csl74-datepicker-time-val', text: pad(val) }).appendTo($wrap);
+			$('<button>', { type: 'button', class: 'csl74-datepicker-btn csl74-datepicker-time-down', html: SVG_ICONS.down })
+				.on('click', function (e) { e.stopPropagation(); onStep(-1); self.commit(); self.render(); }).appendTo($wrap);
+			return $wrap;
+		}
+
+		var hours = this.selectedDate.getHours();
+		var minutes = this.selectedDate.getMinutes();
+		var seconds = this.selectedDate.getSeconds();
+
+		$time.append(makeSpinner(hours, 23, function (dir) {
+			self.selectedDate.setHours((hours + dir + 24) % 24);
+		}));
+		$time.append($('<span>', { class: 'csl74-datepicker-time-sep', text: ':' }));
+		$time.append(makeSpinner(minutes, 59, function (dir) {
+			var step = self.opts.stepMinute || 1;
+			self.selectedDate.setMinutes((minutes + dir * step + 60) % 60);
+		}));
+
+		if (this.opts.pickSeconds) {
+			$time.append($('<span>', { class: 'csl74-datepicker-time-sep', text: ':' }));
+			$time.append(makeSpinner(seconds, 59, function (dir) {
+				var step = self.opts.stepSecond || 1;
+				self.selectedDate.setSeconds((seconds + dir * step + 60) % 60);
+			}));
+		}
+	};
+
+	DatePickerWidget.prototype._renderFooter = function ($container) {
+		var self = this;
+		var $footer = $('<div>', { class: 'csl74-datepicker-footer' }).appendTo($container);
+		var todayText = (crazy74 && crazy74.lang && (crazy74.lang.get('date', 'now') || crazy74.lang.get('now'))) || 'сейчас';
+
+		$('<button>', { type: 'button', class: 'csl74-datepicker-today-btn', text: todayText })
+			.on('click', function (e) {
+				e.stopPropagation();
+				var now = new Date();
+				self.selectedDate = now;
+				self.viewDate = new Date(now.getFullYear(), now.getMonth(), 1);
+				self.commit();
+				if (!self.opts.pickTime) {
+					closeActivePicker();
+				} else {
+					self.render();
+				}
+			}).appendTo($footer);
+	};
+
+	DatePickerWidget.prototype.commit = function () {
+		var formatted = formatDate(this.selectedDate, this.opts);
+		this.$input.val(formatted).trigger('change');
+		if (typeof this.opts.onSelect === 'function') {
+			this.opts.onSelect(this.selectedDate, formatted, this.$input);
+		}
+	};
+
+	DatePickerWidget.prototype._realign = function () {
+		if (!this.$el || typeof $.fn.csl74Position !== 'function') return;
+		var posConfig = (crazy74 && crazy74.array && typeof crazy74.array.clone === 'function')
+			? crazy74.array.clone(this.opts.position)
+			: $.extend(true, [], this.opts.position);
+
+		if (posConfig[0] && posConfig[0][0]) {
+			posConfig[0][0].of = this.$input;
+		}
+		this.$el.show().csl74Position(posConfig[0], posConfig[1]);
+	};
+
+	$.fn.csl74DatePicker = $.fn.cls74DatePicker = function (options) {
+		return this.each(function () {
+			var $target = $(this);
+			var $input, $trigger;
+
+			if ($target.is('input')) {
+				$input = $target;
+				if (options && options.trigger) {
+					if (typeof options.trigger === 'string') {
+						$trigger = $input.siblings(options.trigger);
+						if (!$trigger.length) {
+							$trigger = $input.closest('.control-group, .form-group, .input-group, div').find(options.trigger);
+						}
+					} else if (options.trigger === true) {
+						$trigger = $input.siblings('button, .speed-button, .btn');
+					} else {
+						$trigger = $(options.trigger);
+					}
+				}
+			} else {
+				$input = $target.find('input[type="text"], input:not([type]), input').first();
+				var triggerSelector = (options && typeof options.trigger === 'string')
+					? options.trigger
+					: 'button, .speed-button, .btn';
+				$trigger = $target.find(triggerSelector);
+			}
+
+			if (!$input || !$input.length) return;
+
+			var opts = $.extend({
+				openOnInput: !(options && (options.trigger || !$target.is('input')))
+			}, options);
+
+			var openPicker = function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				var isSame = ACTIVE_INPUT && ACTIVE_INPUT[0] === $input[0];
+				closeActivePicker();
+				if (isSame) return;
+
+				var widget = new DatePickerWidget($input, opts);
+				widget.render();
+				ACTIVE_PICKER = widget;
+				ACTIVE_INPUT = $input;
+
+				if (typeof widget.opts.onOpen === 'function') {
+					widget.opts.onOpen(widget.$el, $input);
+				}
+
+				setTimeout(function () {
+					$(document).on('click.csl74DatePicker', function () {
+						closeActivePicker();
+					});
+					$(document).on('keydown.csl74DatePicker', function (ev) {
+						if (ev.key === 'Escape') {
+							closeActivePicker();
+						}
+					});
+				}, 0);
+			};
+
+			$input.off('click.csl74DatePicker');
+			if (opts.openOnInput) {
+				$input.on('click.csl74DatePicker', openPicker);
+			}
+
+			if ($trigger && $trigger.length) {
+				$trigger.off('click.csl74DatePicker').on('click.csl74DatePicker', openPicker);
+			}
+		});
+	};
+
+	$.csl74DatePicker = $.cls74DatePicker = {
+		close: closeActivePicker
+	};
+
+})(window, window.jQuery, window.crazy74);

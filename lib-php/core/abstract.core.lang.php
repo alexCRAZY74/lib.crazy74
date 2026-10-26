@@ -12,6 +12,22 @@ abstract class lang {
   public static string $default = 'ru';
 	protected static string $sessionCacheKey = '__lang_cache';
 	protected static string $sessionCodeKey = '__lang_code';
+	protected static string $sessionTimeKey = '__lang_mtime';
+	protected static bool $keysInitialized = false;
+
+	protected static function initKeys(): void {
+		if (static::$keysInitialized) {
+			return;
+		}
+		global $_ROOTFOLDERS;
+		if (is_array($_ROOTFOLDERS) && !empty($_ROOTFOLDERS[0]) && is_string($_ROOTFOLDERS[0])) {
+			$suffix = '_' . md5($_ROOTFOLDERS[0]);
+			static::$sessionCacheKey .= $suffix;
+			static::$sessionCodeKey .= $suffix;
+			static::$sessionTimeKey .= $suffix;
+		}
+		static::$keysInitialized = true;
+	}
 
   public static function Error(mixed ...$args): mixed {
     if (class_exists('\\errors')) {
@@ -59,6 +75,7 @@ abstract class lang {
   }
 
   public static function load(string $name = 'labels', string $code = ''): array {
+    static::initKeys();
     if ($code === '') {
       $code = static::$code !== '' ? static::$code : static::$default;
     }
@@ -95,8 +112,11 @@ abstract class lang {
 	}
 
 	public static function Init(): void {
+		static::initKeys();
 		$debug = false;
 		if ($debug) console::groupFunc();
+		if ($debug) console::log('static::$sessionCodeKey', static::$sessionCodeKey);
+		if ($debug) console::log('static::$sessionCacheKey', static::$sessionCacheKey);
     $reqLang = \array_var::get(array_merge($_GET, $_POST), 'lang');
 		if ($debug) console::log('$reqLang', $reqLang);
 
@@ -113,8 +133,11 @@ abstract class lang {
       static::$code = static::$default;
     }
 
-    if (!isset($_SESSION[static::$sessionCacheKey][static::$code])) {
-      static::buildCache(static::$code);
+    $currentMtime = static::getFilesMtime(static::$code);
+    $cachedMtime = (int) \array_var::get($_SESSION, [static::$sessionTimeKey, static::$code], 0);
+
+    if (!isset($_SESSION[static::$sessionCacheKey][static::$code]) || $currentMtime > $cachedMtime) {
+      static::buildCache(static::$code, $currentMtime);
     }
 
     // Проверка существования перевода (аналог старой проверки info)
@@ -129,7 +152,29 @@ abstract class lang {
 		if ($debug) console::groupEnd();
   }
 
-  private static function buildCache(string $code): void {
+  protected static function getFilesMtime(string $code): int {
+    global $_ROOTFOLDERS;
+    $maxMtime = 0;
+    if (is_array($_ROOTFOLDERS) && !empty($_ROOTFOLDERS)) {
+      foreach ($_ROOTFOLDERS as $dir) {
+        $langDir = rtrim((string) $dir, '/\\') . '/language/';
+        if (is_dir($langDir) && is_readable($langDir)) {
+          $files = glob($langDir . '*_' . $code . '.json');
+          if (is_array($files)) {
+            foreach ($files as $file) {
+              $mtime = filemtime($file);
+              if ($mtime !== false && $mtime > $maxMtime) {
+                $maxMtime = $mtime;
+              }
+            }
+          }
+        }
+      }
+    }
+    return $maxMtime;
+  }
+
+  private static function buildCache(string $code, int $mtime = 0): void {
     global $_ROOTFOLDERS;
 		$debug = false;
 		if ($debug) console::groupFunc();
@@ -167,12 +212,20 @@ abstract class lang {
     }
 
     $_SESSION[static::$sessionCacheKey][$code] = $cache;
+    if ($mtime === 0) {
+      $mtime = static::getFilesMtime($code);
+    }
+    $_SESSION[static::$sessionTimeKey][$code] = $mtime;
 		if ($debug) console::groupEnd();
   }
 
   public static function ClearCache(): void {
+    static::initKeys();
     if (isset($_SESSION[static::$sessionCacheKey])) {
       unset($_SESSION[static::$sessionCacheKey]);
+    }
+    if (isset($_SESSION[static::$sessionTimeKey])) {
+      unset($_SESSION[static::$sessionTimeKey]);
     }
   }
 }
