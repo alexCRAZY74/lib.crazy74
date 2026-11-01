@@ -589,6 +589,7 @@
 	};
 
 	const crazy74 = global.crazy74 || {};
+	crazy74.version = '1.1.0';
 	crazy74.lang = new LangManager();
 	crazy74.number = new NumberManager();
 	crazy74.array = new ArrayVarManager();

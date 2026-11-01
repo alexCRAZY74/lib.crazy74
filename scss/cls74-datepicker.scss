@@ -42,7 +42,7 @@ $datepicker_BlockColumns: 3 !default;
 
 /* Переменные datepicker: шрифты */
 $datepicker_FontSize: $uiFontSize !default;
-$datepicker_SmallFontSize: $datepicker_FontSize * 0.9 !default;
+$datepicker_SmallFontSize: calc($datepicker_FontSize * 0.9) !default;
 $datepicker_FontSizeHead: $datepicker_SmallFontSize !default;
 $datepicker_FontSizeAction: $datepicker_SmallFontSize !default;
 $datepicker_FontSizeTime: $datepicker_SmallFontSize !default;

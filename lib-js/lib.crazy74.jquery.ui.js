@@ -1,3 +1,4 @@
+/*! lib.crazy74.jquery.ui.js v1.1.0 */
 (function (window, $, crazy74) {
 	'use strict';
 
@@ -1058,6 +1059,9 @@
 				e.stopPropagation();
 			});
 			$('body').append(this.$el);
+			if (typeof $.fn.maxZIndex === 'function') {
+				this.$el.maxZIndex();
+			}
 		}
 
 		if (this.opts.pickDate) {
