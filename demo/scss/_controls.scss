@@ -1,0 +1,27 @@
+@charset "utf-8";
+
+input, textarea, button, select {
+	padding: $normalPadding;
+	font-family: inherit;
+	font-size: inherit;
+	font-size: 0.9em;
+}
+button, select  {
+	cursor: pointer;
+}
+label {
+	font-size: 0.85em;
+	color: lighten($frameColorDark, 20%);
+}
+
+.form-control {
+	padding: $normalPadding;
+	border: 1px solid $frameColorLight;
+	border-radius: $borderRadius;
+	font-family: inherit;
+
+	&:focus {
+		outline: none;
+		border-color: $accentColor;
+	}
+}

@@ -38,14 +38,17 @@ As a result, the library can be extended infinitely for any specific project by 
 
 ## Library Structure and Documentation
 
-### 1. Frontend Layer (`/lib-js`)
+### 1. Frontend Layer (/lib-js)
 Contains the standalone client-side JavaScript library and jQuery plugins, usable independently from the PHP layer:
 * `lib.crazy74.js` — core JavaScript library (DOM manipulation, object utilities, Cookie & Storage management, event handling, localization).
 * `lib.crazy74.jquery.js` — extensions and UI plugins for jQuery.
+* `lib.crazy74.jquery.ui.js` — jQuery UI components (csl74Position, csl74Window, csl74Menu, csl74Select, csl74Tabs, csl74DatePicker).
 
 Detailed Documentation:
 * [lib.crazy74.js Documentation](lib.crazy74.md)
 * [lib.crazy74.jquery.js Documentation](lib.crazy74.jquery.md)
+* [lib.crazy74.jquery.ui.js Documentation](lib.crazy74.jquery.ui.md)
+* [lib.crazy74.jquery.ui.js Documentation](lib.crazy74.jquery.ui.md)
 
 ### 2. Backend Core (`/lib-php`)
 Contains core abstractions and backend services designed for project-level inheritance:
@@ -109,10 +112,11 @@ This provides a flexible and extensible autoloading architecture for all library
 
 The library is designed from the ground up to support code generation and maintenance by LLMs (Claude, Gemini, GPT, etc.). To facilitate this, the repository includes **trainer files** — technical reference manuals detailing API behaviors, architectural constraints, and subtle edge cases not evident from code inspection alone:
 
-* [`lib.crazy74.md`](https://www.google.com/search?q=lib.crazy74.md) — Server-side PHP core behavior.
-* [`lib.crazy74.jquery.md`](https://www.google.com/search?q=lib.crazy74.jquery.md) — Client-side JS/jQuery layer behavior.
-* [`php-shared-lib.md`](https://www.google.com/search?q=php-shared-lib.md) — In-depth reference for PHP components (autoloader, `App`, `TwigPage`, DB, AI integration, etc.).
-* [`PROJECT.md`](https://www.google.com/search?q=PROJECT.md) — Architecture overview of the repository and demo application.
+* [`lib.crazy74.md`](lib.crazy74.md) — Server-side PHP core behavior.
+* [`lib.crazy74.jquery.md`](lib.crazy74.jquery.md) — Client-side JS/jQuery layer behavior.
+* [`lib.crazy74.jquery.ui.md`](lib.crazy74.jquery.ui.md) — jQuery UI components reference.
+* [`php-shared-lib.md`](php-shared-lib.md) — In-depth reference for PHP components (autoloader, `App`, `TwigPage`, DB, AI integration, etc.).
+* [`PROJECT.md`](PROJECT.md) — Architecture overview of the repository and demo application.
 
 Before generating or modifying code in this repository, AI assistants MUST:
 
@@ -127,6 +131,5 @@ Before generating or modifying code in this repository, AI assistants MUST:
 
 Developed and maintained by AlexCRAZY74 (Almaty, KZ):
 
-* [alexcrazy74.taplink.kz](https://alexcrazy74.taplink.kz/)
-* [linktr.ee/AlexCRAZY74](https://linktr.ee/AlexCRAZY74)
+* [alexcrazy74.github.io/Me](https://alexcrazy74.github.io/Me/)
 

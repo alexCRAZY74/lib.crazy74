@@ -10,6 +10,11 @@
 			"title": "Quantities, Numbers & Dates",
 			"description": "Formatting bytes, numbers, inflections, and dynamic SmartTime"
 		},
+		"ui_templates": {
+			"menu-item": "Twig & UI",
+			"title": "TwigPage Templating & UI",
+			"description": "Component rendering, headLinkFile version control, and blocks"
+		},
 		"rest_api": {
 			"menu-item": "REST API",
 			"title": "REST API & AJAX Exchange",
@@ -19,11 +24,6 @@
 			"menu-item": "AI Interface",
 			"title": "AI Integration & Providers",
 			"description": "Testing Gemini / OpenAI API, response parsing, and JSON schemas"
-		},
-		"ui_templates": {
-			"menu-item": "Twig & UI",
-			"title": "TwigPage Templating & UI",
-			"description": "Component rendering, headLinkFile version control, and blocks"
 		}
 	},
 	"common": {

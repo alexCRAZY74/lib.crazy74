@@ -10,6 +10,11 @@
 			"title": "Величины, Числа и Даты",
 			"description": "Форматирование байт, чисел, падежей и динамическое время SmartTime"
 		},
+		"ui_templates": {
+			"menu-item": "UI & Twig",
+			"title": "Элементы UI шаблонизация TwigPage",
+			"description": "Рендеринг компонентов, контроллер версий headLinkFile и блоки"
+		},
 		"rest_api": {
 			"menu-item": "REST-API",
 			"title": "REST-API и AJAX-обмен",
@@ -19,11 +24,6 @@
 			"menu-item": "ИИ-Интерфейс",
 			"title": "Интеграция ИИ и Провайдеры",
 			"description": "Тестирование Gemini / OpenAI API, парсинг ответов и JSON-схем"
-		},
-		"ui_templates": {
-			"menu-item": "Twig & UI",
-			"title": "Шаблонизация TwigPage и UI",
-			"description": "Рендеринг компонентов, контроллер версий headLinkFile и блоки"
 		}
 	},
 	"common": {

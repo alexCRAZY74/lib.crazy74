@@ -1,0 +1,54 @@
+/* --- UI Templates & Positioning Sandbox --- */
+
+.ui-demo {
+  display: flex;
+  flex-direction: column;
+  gap: $spaceSize;
+
+}
+
+.pos-sandbox {
+  position: relative;
+  min-height: 250px;
+  background-color: #f8f9fa;
+  border: 1px solid $frameColorLight;
+  border-radius: $borderRadius;
+  padding: $spaceSize;
+
+  .demo-target {
+    position: absolute;
+    padding: 0.6em 1em;
+    border: 2px dashed $frameColorDark;
+    border-radius: $borderRadius;
+    font-weight: bold;
+    font-size: 0.85em;
+
+    &.target-a {
+      top: 40px;
+      left: 60px;
+      background-color: #e3f2fd;
+      border-color: #2196f3;
+    }
+
+    &.target-b {
+      bottom: 40px;
+      right: 60px;
+      background-color: #fff3e0;
+      border-color: #ff9800;
+    }
+  }
+
+  .controls-bar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 0.5rem;
+  }
+	.demo-popper {
+		display: inline-block;
+    padding: 0.3em 0.4em;
+    border: 2px dotted $frameColorDark;
+		background: #fff;
+	}
+}

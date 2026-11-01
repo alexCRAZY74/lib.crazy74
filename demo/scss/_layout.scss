@@ -1,0 +1,37 @@
+@charset "utf-8";
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	.button-group {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+	}
+}
+
+.demo-card {
+	border: 1px solid $frameColorLight;
+	border-radius: $borderRadius;
+	padding: $normalPadding;
+	padding-top: $normalSpaceHorizontal;
+	background-color: #fff;
+
+	h2 {
+		margin-top: 0;
+		margin-bottom: $normalSpaceVertical;
+		font-size: 1.2em;
+		border-bottom: 1px solid lighten($frameColorLight, 30%);
+		padding-bottom: 0.4rem;
+		color: $frameColorDark;
+	}
+
+	.demo-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: $normalSpaceVertical;
+		margin-bottom: $normalSpaceVertical;
+	}
+
+}

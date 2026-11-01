@@ -1,0 +1,117 @@
+@charset "UTF-8";
+/* стили csl74-menu */
+/* Базовые переменные палитры NetBeans с фолбеками */
+/* Цвет выделения / ховера */
+/* Для акцентных / danger элементов */
+/* Для disabled / subtext */
+.cls74-control .control-group .speed-button .icon, .csl74-tabs .csl74-tabs-nav .csl74-tabs-item .icon, .csl74-select .icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: middle;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain; }
+
+.cls74-control .form-control, .cls74-control .speed-button, .cls74-control .csl74-select {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #cccccc;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: inherit;
+  font-size: 12px; }
+  .cls74-control .form-control:focus, .cls74-control .speed-button:focus, .cls74-control .csl74-select:focus {
+    outline: none; }
+.cls74-control button.form-control, .cls74-control select.form-control, .cls74-control .speed-button {
+  cursor: pointer; }
+.cls74-control .control-group {
+  font-family: inherit;
+  font-size: inherit;
+  border-radius: 3px;
+  padding: 0;
+  display: flex;
+  flex-direction: row; }
+  .cls74-control .control-group > * {
+    border-radius: 0; }
+    .cls74-control .control-group > *:first-child {
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px; }
+    .cls74-control .control-group > *:last-child {
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px; }
+    .cls74-control .control-group > *:not(:first-child) {
+      border-left: none; }
+  .cls74-control .control-group .form-control {
+    flex: 1 1 auto; }
+.cls74-control .csl74-select .csl74-select-value {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem; }
+  .cls74-control .csl74-select .csl74-select-value .text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis; }
+
+.csl74-tabs {
+  display: flex;
+  flex-direction: column; }
+  .csl74-tabs .csl74-tabs-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 2px;
+    border-bottom: 1px solid #cccccc;
+    user-select: none; }
+    .csl74-tabs .csl74-tabs-nav .csl74-tabs-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      margin-bottom: -1px;
+      background: transparent;
+      color: inherit;
+      font-size: 12px; }
+      .csl74-tabs .csl74-tabs-nav .csl74-tabs-item:hover {
+        background-color: rgba(0, 0, 0, 0.05); }
+      .csl74-tabs .csl74-tabs-nav .csl74-tabs-item.is-active, .csl74-tabs .csl74-tabs-nav .csl74-tabs-item.active {
+        background-color: #f0f0f0;
+        border-color: #cccccc;
+        border-bottom-color: #f0f0f0; }
+  .csl74-tabs .csl74-tabs-panels {
+    flex: 1 1 auto; }
+    .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel {
+      display: none; }
+      .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel.is-active, .csl74-tabs .csl74-tabs-panels .csl74-tabs-panel.active {
+        display: block; }
+
+/* Шеврон / Стрелка вниз */
+.csl74-icon-chevron-down {
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'); }
+
+.csl74-select {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.5em;
+  align-items: center;
+  cursor: pointer; }
+  .csl74-select > select {
+    display: none; }
+  .csl74-select > *:not(.icon) {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+  .csl74-select.is-open .csl74-icon-chevron-down {
+    transform: rotate(180deg); }
+
+/*# sourceMappingURL=cls74-controls.css.map */

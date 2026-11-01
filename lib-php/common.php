@@ -11,6 +11,8 @@ function is_assoc(mixed $var): bool {
   return is_array($var) && !array_is_list($var);
 }
 class SharedCommon {
+  public const VERSION = '1.1.0';
+
   public static function auto_load(string $name): void {
     global $_ROOTFOLDERS;
     if (class_exists($name,false)) return;
