@@ -42,10 +42,11 @@
 Содержит автономную клиентскую библиотеку и плагины для jQuery — можно подключать независимо от PHP-части:
 * `lib.crazy74.js` — базовая библиотека JavaScript (управление DOM, манипуляция объектами, Cookie, Storage, события, локализация).
 * `lib.crazy74.jquery.js` — набор расширений и UI-плагинов для jQuery.
+* `lib.crazy74.jquery.ui.js` — jQuery UI компоненты (csl74Position, csl74Window, csl74Menu, csl74Select, csl74Tabs, csl74DatePicker).
 
-Подробная документация:
 * [Инструкция по lib.crazy74.js](lib.crazy74.md)
 * [Инструкция по lib.crazy74.jquery.js](lib.crazy74.jquery.md)
+* [Инструкция по lib.crazy74.jquery.ui.js](lib.crazy74.jquery.ui.md)
 
 ### 2. Серверное ядро (`/lib-php`)
 Содержит фундаментальные абстракции и сервисы, рассчитанные на наследование в проектном коде:
@@ -110,6 +111,7 @@ spl_autoload_register(['SharedCommon', 'auto_load']);
 
 * [`lib.crazy74.md`](lib.crazy74.md) — поведение серверного PHP-ядра.
 * [`lib.crazy74.jquery.md`](lib.crazy74.jquery.md) — поведение клиентского JS/jQuery-слоя.
+* [`lib.crazy74.jquery.ui.md`](lib.crazy74.jquery.ui.md) — описание jQuery UI компонентов.
 * [`php-shared-lib.md`](php-shared-lib.md) — детальное описание PHP-компонентов (автозагрузчик, `App`, `TwigPage`, БД, AI-интеграция и т.д.).
 * [`PROJECT.md`](PROJECT.md) — архитектура репозитория и демо-приложения в целом.
 
@@ -125,5 +127,4 @@ spl_autoload_register(['SharedCommon', 'auto_load']);
 ## Автор
 
 Библиотеку разрабатывает и поддерживает AlexCRAZY74 (Almaty, KZ):
-* [alexcrazy74.taplink.kz](https://alexcrazy74.taplink.kz/)
-* [linktr.ee/AlexCRAZY74](https://linktr.ee/AlexCRAZY74)
+* [alexcrazy74.github.io/Me](https://alexcrazy74.github.io/Me/)
