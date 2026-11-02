@@ -1310,8 +1310,32 @@
 			if (!$input || !$input.length) return;
 
 			var opts = $.extend({
+				pickDate: true,
+				pickTime: true,
+				pickSeconds: false,
+				format: null,
+				minDate: null,
+				maxDate: null,
+				stepMinute: 1,
+				stepSecond: 1,
+				customClass: '',
+				position: [
+					[{ my: 'left top', at: 'left bottom' }],
+					{ collision: 'flipfit' }
+				],
+				onSelect: null,
+				onOpen: null,
+				onClose: null,
 				openOnInput: !(options && (options.trigger || !$target.is('input')))
 			}, options);
+
+			var val = $.trim($input.val());
+			if (val) {
+				var parsed = parseDate(val);
+				if (parsed) {
+					$input.val(formatDate(parsed, opts));
+				}
+			}
 
 			var openPicker = function (e) {
 				e.preventDefault();
