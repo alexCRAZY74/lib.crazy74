@@ -531,47 +531,56 @@
 		return dateLabel;
 	};
 
-	DateManager.prototype.fmtAgo = function (dt) {
-		if (dt === 'never') {
-			return crazy74.lang.get(['date', 'neverdate'], 'никогда');
-		}
-		const d = this.parseDate(dt);
-		if (!d)
-			return '';
+  DateManager.prototype.fmtAgo = function (dt, options = {}) {
+    if (dt === 'never') {
+      return crazy74.lang.get(['date', 'neverdate'], 'никогда');
+    }
+    const defaults = {
+      withTime: true,
+      short: false
+    };
+    let opt = crazy74.array.merge(true, {}, defaults, options);
+    const d = this.parseDate(dt);
+    if (!d)
+      return '';
 
-		const now = new Date();
-		const diffSec = Math.floor((now.getTime() - d.getTime()) / 1000);
+    if (!opt.withTime) {
+      return this.fmtSmart(d, opt);
+    }
 
-		if (diffSec < 0) {
-			return this.fmtSmart(d);
-		}
+    const now = new Date();
+    const diffSec = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-		if (diffSec < 10) {
-			return crazy74.lang.get(['date', 'just_now'], 'только что');
-		}
+    if (diffSec < 0) {
+      return this.fmtSmart(d, opt);
+    }
 
-		if (diffSec < 60) {
-			const endings = crazy74.lang.get(['date', 'units', 'second'], ['секунду', 'секунды', 'секунд']);
-			const ago = crazy74.lang.get(['date', 'ago'], 'назад');
-			return diffSec + crazy74.number.ending(diffSec, endings) + ' ' + ago;
-		}
+    if (diffSec < 10) {
+      return crazy74.lang.get(['date', 'just_now'], 'только что');
+    }
 
-		const diffMin = Math.floor(diffSec / 60);
-		if (diffMin < 60) {
-			const endings = crazy74.lang.get(['date', 'units', 'minute'], ['минуту', 'минуты', 'минут']);
-			const ago = crazy74.lang.get(['date', 'ago'], 'назад');
-			return diffMin + crazy74.number.ending(diffMin, endings) + ' ' + ago;
-		}
+    if (diffSec < 60) {
+      const endings = crazy74.lang.get(['date', 'units', 'second'], ['секунду', 'секунды', 'секунд']);
+      const ago = crazy74.lang.get(['date', 'ago'], 'назад');
+      return diffSec + crazy74.number.ending(diffSec, endings) + ' ' + ago;
+    }
 
-		const diffHours = Math.floor(diffMin / 60);
-		if (diffHours < 24) {
-			const endings = crazy74.lang.get(['date', 'units', 'hour'], ['час', 'часа', 'часов']);
-			const ago = crazy74.lang.get(['date', 'ago'], 'назад');
-			return diffHours + crazy74.number.ending(diffHours, endings) + ' ' + ago;
-		}
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) {
+      const endings = crazy74.lang.get(['date', 'units', 'minute'], ['минуту', 'минуты', 'минут']);
+      const ago = crazy74.lang.get(['date', 'ago'], 'назад');
+      return diffMin + crazy74.number.ending(diffMin, endings) + ' ' + ago;
+    }
 
-		return this.fmtSmart(d);
-	};
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) {
+      const endings = crazy74.lang.get(['date', 'units', 'hour'], ['час', 'часа', 'часов']);
+      const ago = crazy74.lang.get(['date', 'ago'], 'назад');
+      return diffHours + crazy74.number.ending(diffHours, endings) + ' ' + ago;
+    }
+
+    return this.fmtSmart(d, opt);
+  };
 
 	DateManager.prototype.timeAgo = DateManager.prototype.fmtAgo;
 	
