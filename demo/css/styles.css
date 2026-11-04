@@ -254,6 +254,8 @@ footer {
   padding: 0;
   display: flex;
   flex-direction: row; }
+  .cls74-control .control-group input {
+    min-width: 0; }
   .cls74-control .control-group > * {
     border-radius: 0; }
     .cls74-control .control-group > *:first-child {
