@@ -356,6 +356,12 @@
 		}
 		return new Date();
 	};
+  
+  
+	DateManager.prototype.toIso = function (dt) {
+		const d = this.parseDate(dt);
+		return d ? d.toISOString() : null;
+	};
 
 	DateManager.prototype.formatLocale = function (dt, options = {}) {
 		if (dt === 'never') {
