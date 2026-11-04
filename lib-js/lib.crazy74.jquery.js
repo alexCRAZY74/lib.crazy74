@@ -62,7 +62,7 @@
 						return;
 					}
 
-					$el.text(crazy74.date.fmtAgo(d));
+					$el.text(crazy74.date.fmtAgo(d, currentOpts));
 					$el.attr('title', crazy74.date.formatLocale(d, currentOpts));
 				} else {
 					var d = rawDt instanceof Date ? rawDt : new Date(rawDt);
