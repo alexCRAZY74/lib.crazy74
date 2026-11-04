@@ -335,26 +335,84 @@
 	/* --- DateManager --- */
 	const DateManager = function () {};
 
-	DateManager.prototype.parseDate = function (dt) {
-		if (dt instanceof Date)
-			return isNaN(dt.getTime()) ? null : dt;
-		if (typeof dt === 'number') {
-			return new Date(dt < 1e11 ? dt * 1000 : dt);
+	function parseByFormat(str, format) {
+		const escapedFormat = format.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+		const tokens = {
+			'Y': '(?<year>\\d{4})',
+			'y': '(?<year>\\d{2})',
+			'm': '(?<month>\\d{2})',
+			'n': '(?<month>\\d{1,2})',
+			'd': '(?<day>\\d{2})',
+			'j': '(?<day>\\d{1,2})',
+			'H': '(?<hour>\\d{2})',
+			'i': '(?<minute>\\d{2})',
+			's': '(?<second>\\d{2})'
+		};
+		const regexString = escapedFormat.replace(/[YymndjHis]/g, match => tokens[match]);
+		let match;
+		try {
+			match = str.match(new RegExp(`^${regexString}$`));
+		} catch (e) {
+			return null;
 		}
-		if (typeof dt === 'string') {
-			const trimmed = dt.trim();
-			if (!trimmed || trimmed === 'never')
-				return null;
-			if (/^\d+$/.test(trimmed)) {
-				const num = Number(trimmed);
-				return new Date(num < 1e11 ? num * 1000 : num);
-			}
+		if (!match || !match.groups) return null;
 
-			// Нормализуем формат "YYYY-MM-DD HH:mm:ss" в ISO "YYYY-MM-DDTHH:mm:ss"
-			const parsed = new Date(trimmed.replace(' ', 'T'));
-			return isNaN(parsed.getTime()) ? null : parsed;
-		}
-		return new Date();
+		const g = match.groups;
+		const year = g.year ? parseInt(g.year.length === 2 ? '20' + g.year : g.year, 10) : new Date().getFullYear();
+		const month = g.month ? parseInt(g.month, 10) - 1 : 0;
+		const day = g.day ? parseInt(g.day, 10) : 1;
+		const hour = g.hour ? parseInt(g.hour, 10) : 0;
+		const minute = g.minute ? parseInt(g.minute, 10) : 0;
+		const second = g.second ? parseInt(g.second, 10) : 0;
+
+		return new Date(year, month, day, hour, minute, second);
+	}
+	
+	DateManager.prototype.parseDate = function (dt) {
+    if (dt instanceof Date)
+        return isNaN(dt.getTime()) ? null : dt;
+    if (typeof dt === 'number') {
+        return new Date(dt < 1e11 ? dt * 1000 : dt);
+    }
+    if (typeof dt === 'string') {
+        const trimmed = dt.trim();
+        if (!trimmed || trimmed === 'never')
+            return null;
+        if (/^\d+$/.test(trimmed)) {
+            const num = Number(trimmed);
+            return new Date(num < 1e11 ? num * 1000 : num);
+        }
+
+        let parsed = null;
+
+        // 1. Проверяем SQL / ISO формат (YYYY-MM-DD с пробелом или T)
+        if (/^\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}/.test(trimmed)) {
+            parsed = new Date(trimmed.replace(' ', 'T'));
+        }
+
+        // 2. Если не подошло, пробуем форматы из локализации
+        if (!parsed || isNaN(parsed.getTime())) {
+            const formats = [
+                crazy74?.lang?.dictionary?.date?.locale_format_with_time || 'j.m.Y H:i',
+                crazy74?.lang?.dictionary?.date?.locale_format || 'j.m.Y'
+            ].filter(Boolean);
+
+            for (const format of formats) {
+                parsed = parseByFormat(trimmed, format);
+                if (parsed && !isNaN(parsed.getTime())) {
+                    break;
+                }
+            }
+        }
+
+        // 3. Крайний случай — отдаем нативному парсеру
+        if (!parsed || isNaN(parsed.getTime())) {
+            parsed = new Date(trimmed);
+        }
+
+        return isNaN(parsed.getTime()) ? null : parsed;
+    }
+    return new Date();
 	};
   
   
